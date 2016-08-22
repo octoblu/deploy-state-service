@@ -14,7 +14,8 @@ DeployStateService = require './services/deploy-state-service'
 debug              = require('debug')('deploy-state-service:server')
 
 class Server
-  constructor: ({@logFn, @disableLogging, @port, @deployStateKey, @octobluRaven})->
+  constructor: ({@logFn, @disableLogging, @port, @database, @deployStateKey, @octobluRaven})->
+    throw new Error 'Missing database' unless @database?
     throw new Error 'Missing deployStateKey' unless @deployStateKey?
     @octobluRaven ?= new OctobluRaven()
 
@@ -42,7 +43,7 @@ class Server
 
     app.options '*', cors()
 
-    deployStateService = new DeployStateService
+    deployStateService = new DeployStateService { @database }
     router = new Router {deployStateService}
 
     router.route app
