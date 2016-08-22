@@ -2,7 +2,10 @@
   "name": "deploy-state-service",
   "version": "1.0.0",
   "description": "deploy-state-service an Octoblu Service",
-  "keywords": ["Octoblu", "Service"],
+  "keywords": [
+    "Octoblu",
+    "Service"
+  ],
   "homepage": "https://github.com/octoblu/deploy-state-service",
   "bugs": "https://github.com/octoblu/deploy-state-service/issues",
   "author": {
@@ -34,11 +37,9 @@
     "debug": "^2.2.0",
     "express": "^4.14.0",
     "express-meshblu-healthcheck": "^1.0.1",
-    "express-meshblu-auth": "^7.0.0",
     "express-package-version": "^0.0.2",
     "express-send-error": "^1.1.0",
     "lodash": "^4.15.0",
-    "meshblu-config": "^6.0.0",
     "morgan": "^1.7.0",
     "octoblu-raven": "^3.2.0",
     "server-destroy": "^1.0.1"

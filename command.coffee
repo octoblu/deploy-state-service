@@ -1,15 +1,14 @@
 _             = require 'lodash'
 OctobluRaven  = require 'octoblu-raven'
-MeshbluConfig = require 'meshblu-config'
 Server        = require './src/server'
 
 class Command
   constructor: ->
     @octobluRaven  = new OctobluRaven()
     @serverOptions = {
-      meshbluConfig:  new MeshbluConfig().toJSON()
       port:           process.env.PORT || 80
       disableLogging: process.env.DISABLE_LOGGING == "true"
+      deployStateKey: process.env.DEPLOY_STATE_KEY
       @octobluRaven,
     }
 
@@ -21,10 +20,8 @@ class Command
     process.exit 1
 
   run: =>
-    # Use this to require env
-    # @panic new Error('Missing required environment variable: ENV_NAME') if _.isEmpty @serverOptions.envName
-    @panic new Error('Missing meshbluConfig') if _.isEmpty @serverOptions.meshbluConfig
-    @panic new Error('Missing port') if _.isEmpty @serverOptions.port
+    @panic new Error('Missing required environment variable: DEPLOY_STATE_KEY') unless @serverOptions.deployStateKey?
+    @panic new Error('Missing port') unless @serverOptions.port?
 
     server = new Server @serverOptions
     server.run (error) =>

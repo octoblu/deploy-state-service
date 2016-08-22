@@ -7,7 +7,6 @@ class Router
   route: (app) =>
     deployStateController = new DeployStateController {@deployStateService}
 
-    app.get '/hello', deployStateController.hello
-    # e.g. app.put '/resource/:id', someController.update
+    app.get '/deployments/:service/:tag', deployStateController.getDeployment
 
 module.exports = Router

@@ -1,7 +1,13 @@
 class DeployStateService
-  doHello: ({hasError}, callback) =>
-    return callback @_createError(755, 'Not enough dancing!') if hasError?
-    callback()
+  getDeployment: ({ service, tag }, callback) =>
+    callback(null, {
+      overall: {
+        color: 'green'
+      },
+      errors: {
+        count: 0
+      }
+    })
 
   _createError: (code, message) =>
     error = new Error message
