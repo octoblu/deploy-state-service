@@ -1,25 +1,19 @@
-shmock        = require 'shmock'
 request       = require 'request'
 mongojs       = require 'mongojs'
-enableDestroy = require 'server-destroy'
 Server        = require '../../src/server'
 
 describe 'Authorize', ->
   beforeEach (done) ->
-    @meshblu = shmock 0xd00d
-    enableDestroy @meshblu
-
     @logFn = sinon.spy()
     serverOptions =
       port: undefined,
       disableLogging: true
       logFn: @logFn
       deployStateKey: 'deploy-state-key'
-      meshbluConfig:
-        hostname: 'localhost'
-        protocol: 'http'
-        resolveSrv: false
-        port: 0xd00d
+      travisOrgUrl: "http://localhost:#{0xbabe}"
+      travisOrgToken: 'travis-org-token'
+      travisProUrl: "http://localhost:#{0xcafe}"
+      travisProToken: 'travis-pro-token'
 
     database = mongojs 'deploy-state-service-test', ['deployments']
     serverOptions.database = database
@@ -33,7 +27,6 @@ describe 'Authorize', ->
       done()
 
   afterEach ->
-    @meshblu.destroy()
     @server.destroy()
 
   describe 'on GET /authorize', ->

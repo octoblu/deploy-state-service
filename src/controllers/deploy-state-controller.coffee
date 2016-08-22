@@ -3,8 +3,8 @@ class DeployStateController
     throw new Error 'Missing deployStateService' unless @deployStateService?
 
   getDeployment: (request, response) =>
-    { service, tag } = request.params
-    @deployStateService.getDeployment { service, tag }, (error, deployment) =>
+    { owner, repo, tag } = request.params
+    @deployStateService.getDeployment { owner, repo, tag }, (error, deployment) =>
       return response.sendError error if error?
       response.status(200).send deployment
 
