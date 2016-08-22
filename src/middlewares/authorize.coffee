@@ -10,7 +10,7 @@ class Authorize
     return response.sendStatus(401) unless key == 'token'
     return response.sendStatus(401) unless value?
     deployStateKey = value.trim()
-    return response.sendStatus(401) unless deployStateKey == @deployStateKey
+    return response.sendStatus(403) unless deployStateKey == @deployStateKey
     next()
 
 module.exports = new Authorize
