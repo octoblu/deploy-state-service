@@ -42,6 +42,12 @@ describe 'Get Deployment', ->
         deployment =
           tag:     'v1.0.0'
           service: 'the-service'
+          state: {
+            color: 'green'
+            errors: {
+              count: 0
+            }
+          }
         @deployments.insert deployment, done
 
       beforeEach (done) ->
@@ -59,6 +65,9 @@ describe 'Get Deployment', ->
       it 'should return a 200', ->
         expect(@response.statusCode).to.equal 200
 
+      it 'should not return the mongo id', ->
+        expect(@body._id).to.not.exist
+
       it 'should have the service name in the response', ->
         expect(@body.service).to.equal 'the-service'
 
@@ -66,9 +75,7 @@ describe 'Get Deployment', ->
         expect(@body.tag).to.equal 'v1.0.0'
 
       it 'should have the overall state set to green', ->
-        expect(@body.state.overall).to.deep.equal {
-          color: 'green'
-        }
+        expect(@body.state.color).to.equal 'green'
 
       it 'should have an error count of 0', ->
         expect(@body.state.errors).to.deep.equal {

@@ -4,8 +4,8 @@ class DeployStateController
 
   getDeployment: (request, response) =>
     { service, tag } = request.params
-    @deployStateService.getDeployment { service, tag }, (error, state) =>
+    @deployStateService.getDeployment { service, tag }, (error, deployment) =>
       return response.sendError error if error?
-      response.status(200).send { service, tag, state }
+      response.status(200).send deployment
 
 module.exports = DeployStateController
