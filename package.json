@@ -1,0 +1,47 @@
+{
+  "name": "deploy-state-service",
+  "version": "1.0.0",
+  "description": "deploy-state-service an Octoblu Service",
+  "keywords": ["Octoblu", "Service"],
+  "homepage": "https://github.com/octoblu/deploy-state-service",
+  "bugs": "https://github.com/octoblu/deploy-state-service/issues",
+  "author": {
+    "name": "Octoblu",
+    "url": "https://github.com/octoblu"
+  },
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/octoblu/deploy-state-service.git"
+  },
+  "scripts": {
+    "start": "node command.js",
+    "test": "mocha"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.0.2",
+    "request": "^2.74.0",
+    "shmock": "^0.8.1",
+    "sinon": "^1.17.5",
+    "sinon-chai": "^2.8.0"
+  },
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "coffee-script": "^1.10.0",
+    "compression": "^1.6.2",
+    "cors": "^2.7.1",
+    "debug": "^2.2.0",
+    "express": "^4.14.0",
+    "express-meshblu-healthcheck": "^1.0.1",
+    "express-meshblu-auth": "^7.0.0",
+    "express-package-version": "^0.0.2",
+    "express-send-error": "^1.1.0",
+    "lodash": "^4.15.0",
+    "meshblu-config": "^6.0.0",
+    "morgan": "^1.7.0",
+    "octoblu-raven": "^3.2.0",
+    "server-destroy": "^1.0.1"
+  },
+  "license": "MIT"
+}
