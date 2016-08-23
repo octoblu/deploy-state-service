@@ -16,19 +16,19 @@ class DeployStateService
     @deployments.findOne { owner, repo, tag }, projection, (error, deployment) =>
       return callback error if error?
       return callback @_createError(404, 'Unable to find deployment') unless deployment?
-      @getTravisStatus { owner, repo, tag }, (error, passed) =>
+      @getTravisStatus { owner, repo, tag }, (error, passing) =>
         return callback error if error?
-        deployment.valid = deployment.valid && passed
+        deployment.valid = deployment.valid && passing
         callback null, deployment
 
   getTravisStatus: ({ owner, repo, tag }, callback) =>
-    async.series [
+    async.parallel [
       async.apply @travisProService.getBuild, { owner, repo, tag }
       async.apply @travisOrgService.getBuild, { owner, repo, tag }
     ], (error, result) =>
       return callback error if error?
-      passed = _.isEmpty _.compact result
-      callback null, passed
+      passing = !_.isEmpty _.compact result
+      callback null, passing
 
   _createError: (code, message) =>
     error = new Error message

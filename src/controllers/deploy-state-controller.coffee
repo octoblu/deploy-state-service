@@ -8,4 +8,10 @@ class DeployStateController
       return response.sendError error if error?
       response.status(200).send deployment
 
+  getTravisStatus: (request, response) =>
+    { owner, repo, tag } = request.params
+    @deployStateService.getTravisStatus { owner, repo, tag }, (error, passing) =>
+      return response.sendError error if error?
+      response.status(200).send { passing }
+
 module.exports = DeployStateController

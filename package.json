@@ -44,7 +44,8 @@
     "mongojs": "^2.4.0",
     "morgan": "^1.7.0",
     "octoblu-raven": "^3.2.0",
-    "server-destroy": "^1.0.1"
+    "server-destroy": "^1.0.1",
+    "travis-status": "^0.1.0"
   },
   "license": "MIT"
 }

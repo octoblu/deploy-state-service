@@ -53,11 +53,13 @@ describe 'Get Deployment', ->
         @deployments.insert deployment, done
 
       beforeEach (done) ->
-        response = [
-          { branch: 'v1.0.0' }
-        ]
-        @getOrgBuilds = @travisOrg.getBuilds { repo: 'the-service', owner: 'the-owner' }, { code: 200, response }
-        @getProBuilds = @travisPro.getBuilds { repo: 'the-service', owner: 'the-owner' }, { code: 404 }
+        response = {
+          branch: {
+            state: 'passed'
+          }
+        }
+        @getOrgBuilds = @travisOrg.getBuilds { slug: 'the-owner/the-service', tag: 'v1.0.0' }, { code: 200, response }
+        @getProBuilds = @travisPro.getBuilds { slug: 'the-owner/the-service', tag: 'v1.0.0' }, { code: 404 }
         options =
           uri: '/deployments/the-owner/the-service/v1.0.0'
           baseUrl: "http://localhost:#{@serverPort}"

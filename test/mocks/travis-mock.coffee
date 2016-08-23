@@ -16,9 +16,9 @@ class TravisMock
   destroy: =>
     @server.destroy()
 
-  getBuilds: ({ owner, repo }, { code, response }) =>
+  getBuilds: ({ slug, tag }, { code, response }) =>
     return @server
-      .get "/repos/#{owner}/#{repo}/builds"
+      .get "/repos/#{slug}/branches/#{tag}"
       .set 'Authorization', "token #{@token}"
       .reply code, response
 

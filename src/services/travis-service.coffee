@@ -1,6 +1,5 @@
-_           = require 'lodash'
-request     = require 'request'
-{ version } = require '../../package.json'
+_            = require 'lodash'
+travisStatus = require 'travis-status'
 
 class TravisService
   constructor: ({ @url, @token }) ->
@@ -9,17 +8,15 @@ class TravisService
 
   getBuild: ({ owner, repo, tag }, callback) =>
     options =
-      uri: "/repos/#{owner}/#{repo}/builds"
-      baseUrl: @url
-      json: true
-      headers:
-        'User-Agent': "Deploy State Service/#{version}"
-        'Authorization': "token #{@token}"
+      apiEndpoint: @url
+      branch: tag
+      repo: "#{owner}/#{repo}"
+      token: @token
 
-    request.get options, (error, response, body) =>
-      return callback error if error?
-      build = _.find body, { branch: tag }
-      return callback null, false unless build?
-      callback null, (_.isNull(build.result) || build.result == 0)
+    travisStatus options, (error, result) =>
+      return callback null, false if error?.statusCode in [403, 404]
+      return callback error, false if error?
+      return callback null, false unless result?.branch?
+      callback null, result?.branch?.state == 'passed'
 
 module.exports = TravisService
