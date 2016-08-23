@@ -67,7 +67,7 @@ describe 'Get Travis Status', ->
         @getOrgBuilds.done()
 
       it 'should have get the builds from travis pro', ->
-        @getOrgBuilds.done()
+        @getProBuilds.done()
 
     describe 'when it does NOT exists', ->
       beforeEach (done) ->
@@ -94,7 +94,7 @@ describe 'Get Travis Status', ->
         @getOrgBuilds.done()
 
       it 'should have get the builds from travis pro', ->
-        @getOrgBuilds.done()
+        @getProBuilds.done()
 
     describe 'when the build is NOT passing', ->
       beforeEach (done) ->
@@ -126,5 +126,5 @@ describe 'Get Travis Status', ->
         @getOrgBuilds.done()
 
       it 'should have get the builds from travis pro', ->
-        @getOrgBuilds.done()
+        @getProBuilds.done()
 

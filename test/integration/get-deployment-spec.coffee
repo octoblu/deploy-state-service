@@ -44,8 +44,7 @@ describe 'Get Deployment', ->
           repo: 'the-service'
           owner: 'the-owner'
           state: {
-            valid: true
-            color: 'green'
+            disabled: false
             errors: {
               count: 0
             }
@@ -86,11 +85,8 @@ describe 'Get Deployment', ->
       it 'should have the tag in the response', ->
         expect(@body.tag).to.equal 'v1.0.0'
 
-      it 'should be valid', ->
-        expect(@body.state.valid).to.be.true
-
-      it 'should have the overall state set to green', ->
-        expect(@body.state.color).to.equal 'green'
+      it 'should not be disabled', ->
+        expect(@body.state.disabled).to.be.false
 
       it 'should have an error count of 0', ->
         expect(@body.state.errors).to.deep.equal {
@@ -101,7 +97,69 @@ describe 'Get Deployment', ->
         @getOrgBuilds.done()
 
       it 'should have get the builds from travis pro', ->
+        @getProBuilds.done()
+
+    describe 'when it exists but is disabled', ->
+      beforeEach (done) ->
+        deployment =
+          tag:  'v1.0.0'
+          repo: 'the-service'
+          owner: 'the-owner'
+          state: {
+            disabled: true
+            errors: {
+              count: 0
+            }
+          }
+        @deployments.insert deployment, done
+
+      beforeEach (done) ->
+        response = {
+          branch: {
+            state: 'passed'
+          }
+        }
+        @getOrgBuilds = @travisOrg.getBuilds { slug: 'the-owner/the-service', tag: 'v1.0.0' }, { code: 200, response }
+        @getProBuilds = @travisPro.getBuilds { slug: 'the-owner/the-service', tag: 'v1.0.0' }, { code: 404 }
+        options =
+          uri: '/deployments/the-owner/the-service/v1.0.0'
+          baseUrl: "http://localhost:#{@serverPort}"
+          headers: {
+            Authorization: 'token deploy-state-key'
+          }
+          json: true
+
+        request.get options, (error, @response, @body) =>
+          done error
+
+      it 'should return a 200', ->
+        expect(@response.statusCode).to.equal 200
+
+      it 'should not return the mongo id', ->
+        expect(@body._id).to.not.exist
+
+      it 'should have the service owner in the response', ->
+        expect(@body.owner).to.equal 'the-owner'
+
+      it 'should have the service repo in the response', ->
+        expect(@body.repo).to.equal 'the-service'
+
+      it 'should have the tag in the response', ->
+        expect(@body.tag).to.equal 'v1.0.0'
+
+      it 'should be disabled', ->
+        expect(@body.state.disabled).to.be.true
+
+      it 'should have an error count of 0', ->
+        expect(@body.state.errors).to.deep.equal {
+          count: 0
+        }
+
+      it 'should have get the builds from travis org', ->
         @getOrgBuilds.done()
+
+      it 'should have get the builds from travis pro', ->
+        @getProBuilds.done()
 
     describe 'when it missing', ->
       beforeEach (done) ->
