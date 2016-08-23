@@ -20,4 +20,10 @@ class DeployStateController
       return response.sendError error if error?
       response.sendStatus code
 
+  listDeployments: (request, response) =>
+    { owner, repo } = request.params
+    @deployStateService.listDeployments { owner, repo }, (error, deployments) =>
+      return response.sendError error if error?
+      response.status(200).send { deployments }
+
 module.exports = DeployStateController

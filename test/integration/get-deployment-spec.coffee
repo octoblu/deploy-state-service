@@ -57,8 +57,8 @@ describe 'Get Deployment', ->
             state: 'passed'
           }
         }
-        @getOrgBuilds = @travisOrg.getBuilds { slug: 'the-owner/the-service', tag: 'v1.0.0' }, { code: 200, response }
-        @getProBuilds = @travisPro.getBuilds { slug: 'the-owner/the-service', tag: 'v1.0.0' }, { code: 404 }
+        @getOrgBuild = @travisOrg.getBuild { slug: 'the-owner/the-service', tag: 'v1.0.0' }, { code: 200, response }
+        @getProBuild = @travisPro.getBuild { slug: 'the-owner/the-service', tag: 'v1.0.0' }, { code: 404 }
         options =
           uri: '/deployments/the-owner/the-service/v1.0.0'
           baseUrl: "http://localhost:#{@serverPort}"
@@ -85,8 +85,14 @@ describe 'Get Deployment', ->
       it 'should have the tag in the response', ->
         expect(@body.tag).to.equal 'v1.0.0'
 
-      it 'should not be disabled', ->
+      it 'should NOT be disabled', ->
         expect(@body.state.disabled).to.be.false
+
+      it 'should be valid', ->
+        expect(@body.state.valid).to.be.true
+
+      it 'should be passing in travis', ->
+        expect(@body.state.travis.passing).to.be.true
 
       it 'should have an error count of 0', ->
         expect(@body.state.errors).to.deep.equal {
@@ -94,10 +100,10 @@ describe 'Get Deployment', ->
         }
 
       it 'should have get the builds from travis org', ->
-        @getOrgBuilds.done()
+        @getOrgBuild.done()
 
       it 'should have get the builds from travis pro', ->
-        @getProBuilds.done()
+        @getProBuild.done()
 
     describe 'when it exists but is disabled', ->
       beforeEach (done) ->
@@ -119,8 +125,8 @@ describe 'Get Deployment', ->
             state: 'passed'
           }
         }
-        @getOrgBuilds = @travisOrg.getBuilds { slug: 'the-owner/the-service', tag: 'v1.0.0' }, { code: 200, response }
-        @getProBuilds = @travisPro.getBuilds { slug: 'the-owner/the-service', tag: 'v1.0.0' }, { code: 404 }
+        @getOrgBuild = @travisOrg.getBuild { slug: 'the-owner/the-service', tag: 'v1.0.0' }, { code: 200, response }
+        @getProBuild = @travisPro.getBuild { slug: 'the-owner/the-service', tag: 'v1.0.0' }, { code: 404 }
         options =
           uri: '/deployments/the-owner/the-service/v1.0.0'
           baseUrl: "http://localhost:#{@serverPort}"
@@ -150,16 +156,22 @@ describe 'Get Deployment', ->
       it 'should be disabled', ->
         expect(@body.state.disabled).to.be.true
 
+      it 'should NOT be valid', ->
+        expect(@body.state.valid).to.be.false
+
+      it 'should be passing in travis', ->
+        expect(@body.state.travis.passing).to.be.true
+
       it 'should have an error count of 0', ->
         expect(@body.state.errors).to.deep.equal {
           count: 0
         }
 
       it 'should have get the builds from travis org', ->
-        @getOrgBuilds.done()
+        @getOrgBuild.done()
 
       it 'should have get the builds from travis pro', ->
-        @getProBuilds.done()
+        @getProBuild.done()
 
     describe 'when it missing', ->
       beforeEach (done) ->

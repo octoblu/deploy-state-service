@@ -44,8 +44,8 @@ describe 'Get Travis Status', ->
             state: 'passed'
           }
         }
-        @getOrgBuilds = @travisOrg.getBuilds { slug: 'the-owner/the-service', tag: 'v1.0.0' }, { code: 200, response }
-        @getProBuilds = @travisPro.getBuilds { slug: 'the-owner/the-service', tag: 'v1.0.0' }, { code: 403 }
+        @getOrgBuild = @travisOrg.getBuild { slug: 'the-owner/the-service', tag: 'v1.0.0' }, { code: 200, response }
+        @getProBuild = @travisPro.getBuild { slug: 'the-owner/the-service', tag: 'v1.0.0' }, { code: 403 }
         options =
           uri: '/status/travis/the-owner/the-service/v1.0.0'
           baseUrl: "http://localhost:#{@serverPort}"
@@ -64,15 +64,15 @@ describe 'Get Travis Status', ->
         expect(@body.passing).to.be.true
 
       it 'should have get the builds from travis org', ->
-        @getOrgBuilds.done()
+        @getOrgBuild.done()
 
       it 'should have get the builds from travis pro', ->
-        @getProBuilds.done()
+        @getProBuild.done()
 
     describe 'when it does NOT exists', ->
       beforeEach (done) ->
-        @getOrgBuilds = @travisOrg.getBuilds { slug: 'the-owner/the-service', tag: 'v1.0.0' }, { code: 404 }
-        @getProBuilds = @travisPro.getBuilds { slug: 'the-owner/the-service', tag: 'v1.0.0' }, { code: 404 }
+        @getOrgBuild = @travisOrg.getBuild { slug: 'the-owner/the-service', tag: 'v1.0.0' }, { code: 404 }
+        @getProBuild = @travisPro.getBuild { slug: 'the-owner/the-service', tag: 'v1.0.0' }, { code: 404 }
         options =
           uri: '/status/travis/the-owner/the-service/v1.0.0'
           baseUrl: "http://localhost:#{@serverPort}"
@@ -91,10 +91,10 @@ describe 'Get Travis Status', ->
         expect(@body.passing).to.be.false
 
       it 'should have get the builds from travis org', ->
-        @getOrgBuilds.done()
+        @getOrgBuild.done()
 
       it 'should have get the builds from travis pro', ->
-        @getProBuilds.done()
+        @getProBuild.done()
 
     describe 'when the build is NOT passing', ->
       beforeEach (done) ->
@@ -103,8 +103,8 @@ describe 'Get Travis Status', ->
             state: 'failed'
           }
         }
-        @getOrgBuilds = @travisOrg.getBuilds { slug: 'the-owner/the-service', tag: 'v1.0.0' }, { code: 200, response }
-        @getProBuilds = @travisPro.getBuilds { slug: 'the-owner/the-service', tag: 'v1.0.0' }, { code: 404 }
+        @getOrgBuild = @travisOrg.getBuild { slug: 'the-owner/the-service', tag: 'v1.0.0' }, { code: 200, response }
+        @getProBuild = @travisPro.getBuild { slug: 'the-owner/the-service', tag: 'v1.0.0' }, { code: 404 }
         options =
           uri: '/status/travis/the-owner/the-service/v1.0.0'
           baseUrl: "http://localhost:#{@serverPort}"
@@ -123,8 +123,8 @@ describe 'Get Travis Status', ->
         expect(@body.passing).to.be.false
 
       it 'should have get the builds from travis org', ->
-        @getOrgBuilds.done()
+        @getOrgBuild.done()
 
       it 'should have get the builds from travis pro', ->
-        @getProBuilds.done()
+        @getProBuild.done()
 

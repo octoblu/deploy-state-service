@@ -1,6 +1,13 @@
 _     = require 'lodash'
 async = require 'async'
 
+PROJECTION =
+  _id:   false
+  tag:   true
+  owner: true
+  repo:  true
+  state: true
+
 class DeployStateService
   constructor: ({ database, @travisProService, @travisOrgService }) ->
     @deployments = database.collection 'deployments'
@@ -9,10 +16,7 @@ class DeployStateService
     @_findDeployment { owner, repo, tag }, (error, deployment) =>
       return callback error if error?
       return callback @_createError(404, 'Unable to find deployment') unless deployment?
-      @getTravisStatus { owner, repo, tag }, (error, passing) =>
-        return callback error if error?
-        deployment.valid = !deployment.state.disabled && passing
-        callback null, deployment
+      @_mapDeployment deployment, callback
 
   createDeployment: ({ owner, repo, tag }, callback) =>
     @_findDeployment { owner, repo, tag }, (error, deployment) =>
@@ -24,15 +28,12 @@ class DeployStateService
         return callback error if error?
         callback null, 201
 
-  _findDeployment: ({ owner, repo, tag }, callback) =>
-    projection =
-      _id:   false
-      tag:   true
-      owner: true
-      repo:  true
-      state: true
-
-    @deployments.findOne { owner, repo, tag }, projection, callback
+  listDeployments: ({ owner, repo }, callback) =>
+    @_findDeployments { owner, repo }, (error, deployments) =>
+      return callback error if error?
+      async.map deployments, @_mapDeployment, (error, deployments) =>
+        return callback error if error?
+        callback null, deployments
 
   getTravisStatus: ({ owner, repo, tag }, callback) =>
     async.parallel [
@@ -42,6 +43,20 @@ class DeployStateService
       return callback error if error?
       passing = !_.isEmpty _.compact result
       callback null, passing
+
+  _mapDeployment: (deployment, callback) =>
+    { owner, repo, tag } = deployment
+    @getTravisStatus { owner, repo, tag }, (error, passing) =>
+      return callback error if error?
+      deployment.state.travis = { passing }
+      deployment.state.valid = !deployment.state.disabled && passing
+      callback null, deployment
+
+  _findDeployment: ({ owner, repo, tag }, callback) =>
+    @deployments.findOne { owner, repo, tag }, PROJECTION, callback
+
+  _findDeployments: ({ owner, repo }, callback) =>
+    @deployments.find { owner, repo }, PROJECTION, callback
 
   _createError: (code, message) =>
     error = new Error message

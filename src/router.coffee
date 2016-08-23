@@ -7,6 +7,7 @@ class Router
   route: (app) =>
     deployStateController = new DeployStateController {@deployStateService}
 
+    app.get '/deployments/:owner/:repo', deployStateController.listDeployments
     app.get '/deployments/:owner/:repo/:tag', deployStateController.getDeployment
     app.post '/deployments/:owner/:repo/:tag', deployStateController.createDeployment
     app.get '/status/travis/:owner/:repo/:tag', deployStateController.getTravisStatus
