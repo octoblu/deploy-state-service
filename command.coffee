@@ -11,10 +11,6 @@ class Command
       port:           process.env.PORT || 80
       disableLogging: process.env.DISABLE_LOGGING == "true"
       deployStateKey: process.env.DEPLOY_STATE_KEY
-      travisOrgUrl:   process.env.TRAVIS_ORG_URL || 'https://api.travis-ci.org'
-      travisOrgToken: process.env.TRAVIS_ORG_TOKEN
-      travisProUrl:   process.env.TRAVIS_PRO_URL || 'https://api.travis-ci.com'
-      travisProToken: process.env.TRAVIS_PRO_TOKEN
       @octobluRaven,
     }
 
@@ -27,8 +23,6 @@ class Command
 
   run: =>
     @panic new Error('Missing required environment variable: MONGODB_URI') unless @mongoDbUri?
-    @panic new Error('Missing required environment variable: TRAVIS_ORG_TOKEN') unless @serverOptions.travisOrgToken?
-    @panic new Error('Missing required environment variable: TRAVIS_PRO_TOKEN') unless @serverOptions.travisProToken?
     @panic new Error('Missing required environment variable: DEPLOY_STATE_KEY') unless @serverOptions.deployStateKey?
     @panic new Error('Missing port') unless @serverOptions.port?
 

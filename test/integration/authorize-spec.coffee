@@ -1,6 +1,6 @@
-request       = require 'request'
-mongojs       = require 'mongojs'
-Server        = require '../../src/server'
+request = require 'request'
+mongojs = require 'mongojs'
+Server  = require '../../src/server'
 
 describe 'Authorize', ->
   beforeEach (done) ->
@@ -10,10 +10,6 @@ describe 'Authorize', ->
       disableLogging: true
       logFn: @logFn
       deployStateKey: 'deploy-state-key'
-      travisOrgUrl: "http://localhost:#{0xbabe}"
-      travisOrgToken: 'travis-org-token'
-      travisProUrl: "http://localhost:#{0xcafe}"
-      travisProToken: 'travis-pro-token'
 
     database = mongojs 'deploy-state-service-test', ['deployments']
     serverOptions.database = database
@@ -35,9 +31,8 @@ describe 'Authorize', ->
         options =
           uri: '/authorize'
           baseUrl: "http://localhost:#{@serverPort}"
-          headers: {
+          headers:
             Authorization: 'token deploy-state-key'
-          }
           json: true
 
         request.get options, (error, @response, @body) =>
@@ -64,9 +59,8 @@ describe 'Authorize', ->
         options =
           uri: '/authorize'
           baseUrl: "http://localhost:#{@serverPort}"
-          headers: {
+          headers:
             Authorization: 'wrong deploy-state-key'
-          }
           json: true
 
         request.get options, (error, @response, @body) =>
@@ -80,9 +74,8 @@ describe 'Authorize', ->
         options =
           uri: '/authorize'
           baseUrl: "http://localhost:#{@serverPort}"
-          headers: {
+          headers:
             Authorization: 'token not-the-deploy-state-key'
-          }
           json: true
 
         request.get options, (error, @response, @body) =>

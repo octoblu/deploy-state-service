@@ -1,24 +1,17 @@
 request       = require 'request'
 mongojs       = require 'mongojs'
-TravisMock    = require '../mocks/travis-mock.coffee'
+moment        = require 'moment'
 Server        = require '../../src/server'
 
 describe 'List Deployments', ->
   beforeEach (done) ->
     @logFn = sinon.spy()
 
-    @travisOrg = new TravisMock { token: 'travis-org-token' }
-    @travisPro = new TravisMock { token: 'travis-pro-token' }
-
     serverOptions =
       port: undefined,
       disableLogging: true
       logFn: @logFn
       deployStateKey: 'deploy-state-key'
-      travisOrgUrl: @travisOrg.getUrl()
-      travisOrgToken: @travisOrg.getToken()
-      travisProUrl: @travisPro.getUrl()
-      travisProToken: @travisPro.getToken()
 
     database = mongojs 'deploy-state-service-test', ['deployments']
     serverOptions.database = database
@@ -32,8 +25,6 @@ describe 'List Deployments', ->
       done()
 
   afterEach ->
-    @travisOrg.destroy()
-    @travisPro.destroy()
     @server.destroy()
 
   describe 'on GET /deployments/the-owner/the-service', ->
@@ -43,12 +34,21 @@ describe 'List Deployments', ->
           tag:  'v1.0.0'
           repo: 'the-service'
           owner: 'the-owner'
-          state: {
-            disabled: false
-            errors: {
-              count: 0
-            }
-          }
+          createdAt: moment('2001-01-01').toDate()
+          build:
+            "travis-ci":
+              passing: true,
+              createdAt: moment('2001-01-01').toDate()
+            "docker":
+              passing: true,
+              createdAt: moment('2001-01-01').toDate()
+          cluster:
+            "major":
+              passing: true,
+              createdAt: moment('2001-01-01').toDate()
+            "minor":
+              passing: true,
+              createdAt: moment('2001-01-01').toDate()
         @deployments.insert deployment, done
 
       beforeEach (done) ->
@@ -56,35 +56,23 @@ describe 'List Deployments', ->
           tag:  'v2.0.0'
           repo: 'the-service'
           owner: 'the-owner'
-          state: {
-            disabled: false
-            errors: {
-              count: 0
-            }
-          }
+          createdAt: moment('2001-01-01').toDate()
+          build:
+            "travis-ci":
+              passing: true,
+              createdAt: moment('2001-01-01').toDate()
+            "docker":
+              passing: false,
+              createdAt: moment('2001-01-01').toDate()
+          cluster: {}
         @deployments.insert deployment, done
 
       beforeEach (done) ->
-        response = {
-          branch: {
-            state: 'passed'
-          }
-        }
-        @getOrgBuildv1 = @travisOrg.getBuild { slug: 'the-owner/the-service', tag: 'v1.0.0' }, { code: 200, response }
-        @getProBuildv1 = @travisPro.getBuild { slug: 'the-owner/the-service', tag: 'v1.0.0' }, { code: 404 }
-        response = {
-          branch: {
-            state: 'failed'
-          }
-        }
-        @getOrgBuildv2 = @travisOrg.getBuild { slug: 'the-owner/the-service', tag: 'v2.0.0' }, { code: 200, response }
-        @getProBuildv2 = @travisPro.getBuild { slug: 'the-owner/the-service', tag: 'v2.0.0' }, { code: 404 }
         options =
           uri: '/deployments/the-owner/the-service'
           baseUrl: "http://localhost:#{@serverPort}"
-          headers: {
+          headers:
             Authorization: 'token deploy-state-key'
-          }
           json: true
 
         request.get options, (error, @response, @body) =>
@@ -99,50 +87,45 @@ describe 'List Deployments', ->
             tag:  'v1.0.0'
             repo: 'the-service'
             owner: 'the-owner'
-            state: {
-              disabled: false
-              valid: true
-              travis: {
-                passing: true
-              }
-              errors: {
-                count: 0
-              }
-            }
+            createdAt: moment('2001-01-01').valueOf()
+            build:
+              "travis-ci":
+                passing: true,
+                createdAt: moment('2001-01-01').valueOf()
+              "docker":
+                passing: true,
+                createdAt: moment('2001-01-01').valueOf()
+            cluster:
+              "major":
+                passing: true,
+                createdAt: moment('2001-01-01').valueOf()
+              "minor":
+                passing: true,
+                createdAt: moment('2001-01-01').valueOf()
           }
           {
             tag:  'v2.0.0'
             repo: 'the-service'
             owner: 'the-owner'
-            state: {
-              disabled: false
-              valid: false
-              travis: {
-                passing: false
-              }
-              errors: {
-                count: 0
-              }
-            }
+            createdAt: moment('2001-01-01').valueOf()
+            build:
+              "travis-ci":
+                passing: true,
+                createdAt: moment('2001-01-01').valueOf()
+              "docker":
+                passing: false,
+                createdAt: moment('2001-01-01').valueOf()
+            cluster: {}
           }
         ]
-
-      it 'should have get the builds from travis org', ->
-        @getOrgBuildv1.done()
-        @getOrgBuildv2.done()
-
-      it 'should have get the builds from travis pro', ->
-        @getProBuildv1.done()
-        @getProBuildv2.done()
 
     describe 'when no deployments exist', ->
       beforeEach (done) ->
         options =
           uri: '/deployments/the-owner/the-service'
           baseUrl: "http://localhost:#{@serverPort}"
-          headers: {
+          headers:
             Authorization: 'token deploy-state-key'
-          }
           json: true
 
         request.get options, (error, @response, @body) =>
