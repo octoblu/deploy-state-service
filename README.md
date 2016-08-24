@@ -18,14 +18,14 @@
     * [Production](#production)
   * [Debugging](#debugging)
   * [Test](#test)
-  * [API](#api)
-    * [List Deployments](#list-deployments)
-    * [Get Deployment](#get-deployment)
-    * [Create Deployment](#create-deployment)
-    * [Update Build Passed](#update-build-passed)
-    * [Update Build Failed](#update-build-failed)
-    * [Update Cluster Passed](#update-cluster-passed)
-    * [Update Cluster Failed](#update-cluster-failed)
+* [API](#api)
+  * [List Deployments](#list-deployments)
+  * [Get Deployment](#get-deployment)
+  * [Create Deployment](#create-deployment)
+  * [Update Build Passed](#update-build-passed)
+  * [Update Build Failed](#update-build-failed)
+  * [Update Cluster Passed](#update-cluster-passed)
+  * [Update Cluster Failed](#update-cluster-failed)
 * [License](#license)
 
 # Introduction
@@ -85,17 +85,17 @@ docker pull quay.io/octoblu/deploy-state-service
 docker run --rm -p 8888:80 quay.io/octoblu/deploy-state-service
 ```
 
-## API
+# API
 
-#### Authentication
+## Authentication
 
 Header `Authorization: token the-secret-key`
 
-### List Deployments
+## List Deployments
 
 `GET /deployments/:owner/:repo`
 
-#### Response
+### Response
 
 ```cson
 deployments: [
@@ -124,11 +124,11 @@ deployments: [
 ]
 ```
 
-### Get Deployment
+## Get Deployment
 
 `GET /deployments/:owner/:repo/:tag`
 
-#### Response
+### Response
 
 ```cson
 {
@@ -155,23 +155,23 @@ deployments: [
 }
 ```
 
-### Create Deployment
+## Create Deployment
 
 `POST /deployments/:owner/:repo/:tag`
 
-### Update Build Passed 
+## Update Build Passed 
 
 `PUT /deployments/:owner/:repo/:tag/build/:state/passed`
 
-### Update Build Failed 
+## Update Build Failed 
 
 `PUT /deployments/:owner/:repo/:tag/build/:state/failed`
 
-### Update Cluster Passed 
+## Update Cluster Passed 
 
 `PUT /deployments/:owner/:repo/:tag/cluster/:state/passed`
 
-### Update Cluster Failed 
+## Update Cluster Failed 
 
 `PUT /deployments/:owner/:repo/:tag/cluster/:state/failed`
 
