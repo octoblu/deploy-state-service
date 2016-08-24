@@ -17,7 +17,6 @@
     * [Development](#development)
     * [Production](#production)
   * [Debugging](#debugging)
-  * [Test](#test)
 * [API](#api)
   * [List Deployments](#list-deployments)
   * [Get Deployment](#get-deployment)
@@ -61,12 +60,6 @@ node command.js
 
 ```bash
 env DEBUG='deploy-state-service*' node command.js
-```
-
-## Test 
-
-```bash
-npm test
 ```
 
 ## Docker 
