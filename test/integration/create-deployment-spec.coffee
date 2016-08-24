@@ -52,7 +52,7 @@ describe 'Create Deployment', ->
           @deployments.findOne query, (error, @record) =>
             done error
 
-        it 'should created at date', ->
+        it 'should have a valid created at date', ->
           expect(moment(@record.createdAt).isBefore(moment())).to.be.true
           expect(moment(@record.createdAt).isAfter(moment().subtract(1, 'minute'))).to.be.true
 

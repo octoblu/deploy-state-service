@@ -37,6 +37,20 @@ class DeployStateService
         return callback error if error?
         callback null, 201
 
+  update: ({ owner, repo, tag, key, passing }, callback) =>
+    @_findDeployment { owner, repo, tag }, (error, deployment) =>
+      return callback error if error?
+      return callback null, 404 unless deployment?
+
+      query = {}
+      query["#{key}.passing"] = passing
+      query["#{key}.createdAt"] = new Date() unless _.get deployment, "#{key}.createdAt"
+      query["#{key}.updatedAt"] = new Date() if _.get deployment, "#{key}.createdAt"
+
+      @deployments.update { owner, repo, tag }, { $set: query }, (error) =>
+        return callback error if error?
+        callback null, 204
+
   listDeployments: ({ owner, repo }, callback) =>
     @_findDeployments { owner, repo }, callback
 
