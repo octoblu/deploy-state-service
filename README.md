@@ -4,8 +4,6 @@
 [![devDependency Status](http://img.shields.io/david/dev/octoblu/deploy-state-service.svg?style=flat)](https://david-dm.org/octoblu/deploy-state-service#info=devDependencies)
 [![Build Status](http://img.shields.io/travis/octoblu/deploy-state-service.svg?style=flat)](https://travis-ci.org/octoblu/deploy-state-service)
 
-[![NPM](https://nodei.co/npm/deploy-state-service.svg?style=flat)](https://npmjs.org/package/deploy-state-service)
-
 # Table of Contents
 
 * [Introduction](#introduction)
