@@ -18,6 +18,14 @@
     * [Production](#production)
   * [Debugging](#debugging)
   * [Test](#test)
+  * [API](#api)
+    * [List Deployments](#list-deployments)
+    * [Get Deployment](#get-deployment)
+    * [Create Deployment](#create-deployment)
+    * [Update Build Passed](#update-build-passed)
+    * [Update Build Failed](#update-build-failed)
+    * [Update Cluster Passed](#update-cluster-passed)
+    * [Update Cluster Failed](#update-cluster-failed)
 * [License](#license)
 
 # Introduction
@@ -36,10 +44,29 @@ npm install
 
 # Usage
 
+### Required Enviroment
+
+```
+MONGODB_URI='mongodb://localhost:27017/some-deploy-state-database'
+DEPLOY_STATE_KEY='the-secret-authentication-key'
+```
+
 ## Default
 
 ```javascript
 node command.js
+```
+
+## Debugging
+
+```bash
+env DEBUG='deploy-state-service*' node command.js
+```
+
+## Test 
+
+```bash
+npm test
 ```
 
 ## Docker 
@@ -58,21 +85,95 @@ docker pull quay.io/octoblu/deploy-state-service
 docker run --rm -p 8888:80 quay.io/octoblu/deploy-state-service
 ```
 
-## Debugging
+## API
 
-```bash
-env DEBUG='deploy-state-service*' node command.js
+#### Authentication
+
+Header `Authorization: token the-secret-key`
+
+### List Deployments
+
+`GET /deployments/:owner/:repo`
+
+#### Response
+
+```cson
+deployments: [
+  {
+    repo : "weather-service"
+    owner: "octoblu"
+    tag  : "v1.0.0"
+    createdAt: 100000000
+    build: {
+      "travis-ci": {
+        passing: true
+        createdAt: 10000000
+      }
+      "docker": {
+        passing: true
+        createdAt: 10000000
+      }
+    }
+    cluster: {
+      "minor": {
+        passing: true
+        createdAt: 10000000
+      }
+    }
+  }
+]
 ```
 
-```bash
-env DEBUG='deploy-state-service*' node command.js
+### Get Deployment
+
+`GET /deployments/:owner/:repo/:tag`
+
+#### Response
+
+```cson
+{
+  repo : "weather-service"
+  owner: "octoblu"
+  tag  : "v1.0.0"
+  createdAt: 100000000
+  build: {
+    "travis-ci": {
+      passing: true
+      createdAt: 10000000
+    }
+    "docker": {
+      passing: true
+      createdAt: 10000000
+    }
+  }
+  cluster: {
+    "minor": {
+      passing: true
+      createdAt: 10000000
+    }
+  }
+}
 ```
 
-## Test 
+### Create Deployment
 
-```bash
-npm test
-```
+`POST /deployments/:owner/:repo/:tag`
+
+### Update Build Passed 
+
+`PUT /deployments/:owner/:repo/:tag/build/:state/passed`
+
+### Update Build Failed 
+
+`PUT /deployments/:owner/:repo/:tag/build/:state/failed`
+
+### Update Cluster Passed 
+
+`PUT /deployments/:owner/:repo/:tag/cluster/:state/passed`
+
+### Update Cluster Failed 
+
+`PUT /deployments/:owner/:repo/:tag/cluster/:state/failed`
 
 ## License
 
