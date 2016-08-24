@@ -30,7 +30,7 @@
 
 # Introduction
 
-...
+The Deploy State Serivce is used for tracking deployments. It is not tied to any specific deployment architecture, or service. The main purpose of this service is to track whether the build steps, and cluster deployments, are passing or not. It is up to the client to determine whether they should be running a deployment.
 
 # Getting Started
 
