@@ -27,7 +27,7 @@ describe 'Create Deployment', ->
   afterEach ->
     @server.destroy()
 
-  describe 'on POST /deployments/the-owner/the-service/v1.0.0', ->
+  describe 'on POST /deployments/:owner/:repo/:tag', ->
     describe 'when does not exist', ->
       beforeEach (done) ->
         options =

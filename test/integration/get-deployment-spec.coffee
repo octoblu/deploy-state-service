@@ -27,7 +27,7 @@ describe 'Get Deployment', ->
   afterEach ->
     @server.destroy()
 
-  describe 'on GET /deployments/the-owner/the-service/v1.0.0', ->
+  describe 'on GET /deployments/:owner/:repo/:tag', ->
     describe 'when it exists', ->
       beforeEach (done) ->
         deployment =
