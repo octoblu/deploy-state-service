@@ -13,10 +13,13 @@ describe 'Update Cluster Passed', ->
       logFn: @logFn
       deployStateKey: 'deploy-state-key'
 
-    database = mongojs 'deploy-state-service-test', ['deployments']
+    database = mongojs 'deploy-state-service-test', ['deployments', 'webhooks']
     serverOptions.database = database
     @deployments = database.deployments
     @deployments.drop()
+
+    @webhooks = database.webhooks
+    @webhooks.drop()
 
     @server = new Server serverOptions
 

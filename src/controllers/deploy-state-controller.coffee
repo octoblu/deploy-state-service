@@ -72,4 +72,18 @@ class DeployStateController
       return response.sendError error if error?
       response.status(200).send { deployments }
 
+  registerWebhook: (request, response) =>
+    { url } = request.body
+    return response.sendStatus(422) unless url?
+    @deployStateService.registerWebhook { url }, (error, code) =>
+      return response.sendError error if error?
+      response.sendStatus code
+
+  deleteWebhook: (request, response) =>
+    { url } = request.body
+    return response.sendStatus(422) unless url?
+    @deployStateService.deleteWebhook { url }, (error, code) =>
+      return response.sendError error if error?
+      response.sendStatus code
+
 module.exports = DeployStateController

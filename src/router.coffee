@@ -14,6 +14,8 @@ class Router
     app.put  '/deployments/:owner/:repo/:tag/build/:state/failed', deployStateController.updateBuildFailed
     app.put  '/deployments/:owner/:repo/:tag/cluster/:state/passed', deployStateController.updateClusterPassed
     app.put  '/deployments/:owner/:repo/:tag/cluster/:state/failed', deployStateController.updateClusterFailed
+    app.post '/webhooks', deployStateController.registerWebhook
+    app.del  '/webhooks', deployStateController.deleteWebhook
     app.get  '/authorize', (request, response) => response.sendStatus(204)
 
 module.exports = Router

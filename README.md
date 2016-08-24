@@ -41,7 +41,7 @@ npm install
 
 # Usage
 
-### Required Enviroment
+### Required Environment
 
 ```
 MONGODB_URI='mongodb://localhost:27017/some-deploy-state-database'

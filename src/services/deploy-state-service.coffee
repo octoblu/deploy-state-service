@@ -1,6 +1,7 @@
-_      = require 'lodash'
-async  = require 'async'
-moment = require 'moment'
+_       = require 'lodash'
+async   = require 'async'
+moment  = require 'moment'
+request = require 'request'
 
 PROJECTION =
   _id:   false
@@ -14,6 +15,7 @@ PROJECTION =
 class DeployStateService
   constructor: ({ database }) ->
     @deployments = database.collection 'deployments'
+    @webhooks = database.collection 'webhooks'
 
   getDeployment: ({ owner, repo, tag }, callback) =>
     @_findDeployment { owner, repo, tag }, (error, deployment) =>
@@ -49,10 +51,42 @@ class DeployStateService
 
       @deployments.update { owner, repo, tag }, { $set: query }, (error) =>
         return callback error if error?
-        callback null, 204
+        @_notifyAll { owner, repo, tag }, (error) =>
+          return callback error if error?
+          callback null, 204
 
   listDeployments: ({ owner, repo }, callback) =>
     @_findDeployments { owner, repo }, callback
+
+  registerWebhook: ({ url }, callback) =>
+    @webhooks.findOne { url }, (error, webhook) =>
+      return callback error if error?
+      return callback null, 204 if webhook?
+      @webhooks.insert { url }, (error) =>
+        return callback error if error?
+        callback null, 201
+
+  deleteWebhook: ({ url }, callback) =>
+    @webhooks.findOne { url }, (error, webhook) =>
+      return callback error if error?
+      return callback null, 404 unless webhook?
+      @webhooks.remove { url }, (error) =>
+        return callback error if error?
+        callback null, 204
+
+  _notifyAll: ({ owner, repo, tag }, callback) =>
+    @webhooks.find {}, (error, webhooks) =>
+      return callback error if error?
+      return callback null if _.isEmpty webhooks
+      @_findDeployment { owner, repo, tag }, (error, deployment) =>
+        return callback error if error?
+        async.each webhooks, @_notify, callback
+
+  _notify: ({ url }, callback) =>
+    request.post url, (error, response) =>
+      return callback error if error?
+      return callback new Error 'Fatal error from webhook' if response.statusCode >= 500
+      callback null
 
   _findDeployment: ({ owner, repo, tag }, callback) =>
     @deployments.findOne { owner, repo, tag }, PROJECTION, (error, deployment) =>

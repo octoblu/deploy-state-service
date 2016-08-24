@@ -26,7 +26,7 @@ class Command
     @panic new Error('Missing required environment variable: DEPLOY_STATE_KEY') unless @serverOptions.deployStateKey?
     @panic new Error('Missing port') unless @serverOptions.port?
 
-    database = mongojs @mongoDbUri, ['deployments']
+    database = mongojs @mongoDbUri, ['deployments', 'webhooks']
     @serverOptions.database = database
 
     server = new Server @serverOptions
