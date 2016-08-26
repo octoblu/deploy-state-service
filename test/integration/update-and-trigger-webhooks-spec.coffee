@@ -1,11 +1,15 @@
 request       = require 'request'
-mongojs       = require 'mongojs'
+Database      = require '../database'
 moment        = require 'moment'
 shmock        = require 'shmock'
 enableDestroy = require 'server-destroy'
 Server        = require '../../src/server'
 
 describe 'Update And Trigger Webhook', ->
+  beforeEach (done) ->
+    @db = new Database
+    @db.drop done
+
   beforeEach (done) ->
     @logFn = sinon.spy()
 
@@ -18,13 +22,7 @@ describe 'Update And Trigger Webhook', ->
       logFn: @logFn
       deployStateKey: 'deploy-state-key'
 
-    database = mongojs 'deploy-state-service-test', ['deployments', 'webhooks']
-    serverOptions.database = database
-    @deployments = database.deployments
-    @deployments.drop()
-
-    @webhooks = database.webhooks
-    @webhooks.drop()
+    serverOptions.database = @db.database
 
     @server = new Server serverOptions
 
@@ -39,7 +37,7 @@ describe 'Update And Trigger Webhook', ->
   describe 'on PUT /deployments/:owner/:repo/:tag/build/:state/passed', ->
     describe 'when the deployment exists', ->
       beforeEach (done) ->
-        @webhooks.insert [
+        @db.webhooks.insert [
           { url: "http://localhost:#{0xbabe}/trigger1", token: 'trigger-1-secret' }
           { url: "http://localhost:#{0xbabe}/trigger2", token: 'trigger-2-secret' }
         ], done
@@ -57,7 +55,7 @@ describe 'Update And Trigger Webhook', ->
             }
           }
           cluster: {}
-        @deployments.insert record, done
+        @db.deployments.insert record, done
 
       beforeEach (done) ->
         deployment =
@@ -107,7 +105,7 @@ describe 'Update And Trigger Webhook', ->
 
     describe 'when the webhook returns a non-204', ->
       beforeEach (done) ->
-        @webhooks.insert [
+        @db.webhooks.insert [
           { url: "http://localhost:#{0xbabe}/trigger", token: 'trigger-secret' }
         ], done
 
@@ -124,7 +122,7 @@ describe 'Update And Trigger Webhook', ->
             }
           }
           cluster: {}
-        @deployments.insert deployment, done
+        @db.deployments.insert deployment, done
 
       beforeEach (done) ->
         deployment =

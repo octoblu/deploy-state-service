@@ -1,9 +1,14 @@
-request = require 'request'
-mongojs = require 'mongojs'
-moment  = require 'moment'
-Server  = require '../../src/server'
+request  = require 'request'
+mongojs  = require 'mongojs'
+moment   = require 'moment'
+Database = require '../database'
+Server   = require '../../src/server'
 
 describe 'Create Deployment', ->
+  beforeEach (done) ->
+    @db = new Database
+    @db.drop done
+
   beforeEach (done) ->
     @logFn = sinon.spy()
 
@@ -13,14 +18,7 @@ describe 'Create Deployment', ->
       logFn: @logFn
       deployStateKey: 'deploy-state-key'
 
-    database = mongojs 'deploy-state-service-test', ['deployments', 'webhooks']
-    serverOptions.database = database
-    @deployments = database.deployments
-    @deployments.drop()
-
-    @webhooks = database.webhooks
-    @webhooks.drop()
-
+    serverOptions.database = @db.database
 
     @server = new Server serverOptions
 
@@ -53,7 +51,7 @@ describe 'Create Deployment', ->
       describe 'when the database record is checked', ->
         beforeEach (done) ->
           query = { owner: 'the-owner', repo: 'the-service', tag: 'v1.0.0' }
-          @deployments.findOne query, (error, @record) =>
+          @db.deployments.findOne query, (error, @record) =>
             done error
 
         it 'should have a valid created at date', ->

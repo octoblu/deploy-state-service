@@ -1,8 +1,12 @@
-request = require 'request'
-mongojs = require 'mongojs'
-Server  = require '../../src/server'
+request  = require 'request'
+Database = require '../database'
+Server   = require '../../src/server'
 
 describe 'Authorize', ->
+  beforeEach (done) ->
+    @db = new Database
+    @db.drop done
+
   beforeEach (done) ->
     @logFn = sinon.spy()
     serverOptions =
@@ -11,10 +15,7 @@ describe 'Authorize', ->
       logFn: @logFn
       deployStateKey: 'deploy-state-key'
 
-    database = mongojs 'deploy-state-service-test', ['deployments']
-    serverOptions.database = database
-    @deployments = database.deployments
-    @deployments.drop()
+    serverOptions.database = @db.database
 
     @server = new Server serverOptions
 

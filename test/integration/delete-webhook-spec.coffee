@@ -1,8 +1,12 @@
-request = require 'request'
-mongojs = require 'mongojs'
-Server  = require '../../src/server'
+request  = require 'request'
+Database = require '../database'
+Server   = require '../../src/server'
 
 describe 'Delete Webhook', ->
+  beforeEach (done) ->
+    @db = new Database
+    @db.drop done
+
   beforeEach (done) ->
     @logFn = sinon.spy()
     serverOptions =
@@ -11,10 +15,7 @@ describe 'Delete Webhook', ->
       logFn: @logFn
       deployStateKey: 'deploy-state-key'
 
-    database = mongojs 'deploy-state-service-test', ['webhooks']
-    serverOptions.database = database
-    @webhooks = database.webhooks
-    @webhooks.drop()
+    serverOptions.database = @db.database
 
     @server = new Server serverOptions
 
@@ -46,7 +47,7 @@ describe 'Delete Webhook', ->
       beforeEach (done) ->
         record =
           url: 'https://some.testing.dev/webhook'
-        @webhooks.insert record, done
+        @db.webhooks.insert record, done
 
       beforeEach (done) ->
         options =
@@ -65,7 +66,7 @@ describe 'Delete Webhook', ->
 
       describe 'when the database is checked', ->
         beforeEach (done) ->
-          @webhooks.findOne { url: 'https://some.testing.dev/webhook' }, (error, @record) =>
+          @db.webhooks.findOne { url: 'https://some.testing.dev/webhook' }, (error, @record) =>
             done error
 
         it 'should NOT have a record', ->

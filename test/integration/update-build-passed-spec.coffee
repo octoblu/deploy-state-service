@@ -1,9 +1,13 @@
-request = require 'request'
-mongojs = require 'mongojs'
-moment  = require 'moment'
-Server  = require '../../src/server'
+request  = require 'request'
+moment   = require 'moment'
+Database = require '../database'
+Server   = require '../../src/server'
 
 describe 'Update Build Passed', ->
+  beforeEach (done) ->
+    @db = new Database
+    @db.drop done
+
   beforeEach (done) ->
     @logFn = sinon.spy()
 
@@ -13,13 +17,7 @@ describe 'Update Build Passed', ->
       logFn: @logFn
       deployStateKey: 'deploy-state-key'
 
-    database = mongojs 'deploy-state-service-test', ['deployments', 'webhooks']
-    serverOptions.database = database
-    @deployments = database.deployments
-    @deployments.drop()
-
-    @webhooks = database.webhooks
-    @webhooks.drop()
+    serverOptions.database = @db.database
 
     @server = new Server serverOptions
 
@@ -59,7 +57,7 @@ describe 'Update Build Passed', ->
             createdAt: moment('2001-01-01').toDate()
             build: {}
             cluster: {}
-          @deployments.insert deployment, done
+          @db.deployments.insert deployment, done
 
         beforeEach (done) ->
           options =
@@ -81,7 +79,7 @@ describe 'Update Build Passed', ->
         describe 'when the database record is checked', ->
           beforeEach (done) ->
             query = { owner: 'the-owner', repo: 'the-service', tag: 'v1.0.0' }
-            @deployments.findOne query, (error, @record) =>
+            @db.deployments.findOne query, (error, @record) =>
               done error
 
           it 'should have a travis-ci set to passed', ->
@@ -105,7 +103,7 @@ describe 'Update Build Passed', ->
               }
             }
             cluster: {}
-          @deployments.insert deployment, done
+          @db.deployments.insert deployment, done
 
         beforeEach (done) ->
           options =
@@ -127,7 +125,7 @@ describe 'Update Build Passed', ->
         describe 'when the database record is checked', ->
           beforeEach (done) ->
             query = { owner: 'the-owner', repo: 'the-service', tag: 'v1.0.0' }
-            @deployments.findOne query, (error, @record) =>
+            @db.deployments.findOne query, (error, @record) =>
               done error
 
           it 'should have a travis-ci set to passed', ->

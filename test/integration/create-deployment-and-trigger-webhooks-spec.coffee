@@ -1,11 +1,15 @@
 request       = require 'request'
-mongojs       = require 'mongojs'
 moment        = require 'moment'
 shmock        = require 'shmock'
 enableDestroy = require 'server-destroy'
+Database      = require '../database'
 Server        = require '../../src/server'
 
 describe 'Create Deployment and Trigger Webhooks', ->
+  beforeEach (done) ->
+    @db = new Database
+    @db.drop done
+
   beforeEach (done) ->
     @logFn = sinon.spy()
 
@@ -18,13 +22,7 @@ describe 'Create Deployment and Trigger Webhooks', ->
       logFn: @logFn
       deployStateKey: 'deploy-state-key'
 
-    database = mongojs 'deploy-state-service-test', ['deployments', 'webhooks']
-    serverOptions.database = database
-    @deployments = database.deployments
-    @deployments.drop()
-
-    @webhooks = database.webhooks
-    @webhooks.drop()
+    serverOptions.database = @db.database
 
     @server = new Server serverOptions
 
@@ -38,7 +36,7 @@ describe 'Create Deployment and Trigger Webhooks', ->
 
   describe 'on POST /deployments/:owner/:repo/:tag', ->
     beforeEach (done) ->
-      @webhooks.insert [
+      @db.webhooks.insert [
         { url: "http://localhost:#{0xbabe}/trigger1", token: 'trigger-1-secret' }
         { url: "http://localhost:#{0xbabe}/trigger2", token: 'trigger-2-secret' }
       ], done
@@ -90,7 +88,7 @@ describe 'Create Deployment and Trigger Webhooks', ->
       describe 'when the database record is checked', ->
         beforeEach (done) ->
           query = { owner: 'the-owner', repo: 'the-service', tag: 'v1.0.0' }
-          @deployments.findOne query, (error, @record) =>
+          @db.deployments.findOne query, (error, @record) =>
             done error
 
         it 'should have a valid created at date', ->
