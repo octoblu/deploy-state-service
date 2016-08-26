@@ -14,57 +14,14 @@ class DeployStateController
       return response.sendError error if error?
       response.sendStatus code
 
-  updateBuildPassed: (request, response) =>
-    { owner, repo, tag, state } = request.params
-    options = {
-      owner,
-      repo,
-      tag,
-      key: "build.#{state}",
-      passing: true
-    }
-    @deployStateService.update options, (error, code) =>
-      return response.sendError error if error?
-      response.sendStatus code
-
-  updateBuildFailed: (request, response) =>
-    { owner, repo, tag, state } = request.params
-    options = {
-      owner,
-      repo,
-      tag,
-      key: "build.#{state}",
-      passing: false
-    }
-    @deployStateService.update options, (error, code) =>
-      return response.sendError error if error?
-      response.sendStatus code
-
-  updateClusterPassed: (request, response) =>
-    { owner, repo, tag, state } = request.params
-    options = {
-      owner,
-      repo,
-      tag,
-      key: "cluster.#{state}",
-      passing: true
-    }
-    @deployStateService.update options, (error, code) =>
-      return response.sendError error if error?
-      response.sendStatus code
-
-  updateClusterFailed: (request, response) =>
-    { owner, repo, tag, state } = request.params
-    options = {
-      owner,
-      repo,
-      tag,
-      key: "cluster.#{state}",
-      passing: false
-    }
-    @deployStateService.update options, (error, code) =>
-      return response.sendError error if error?
-      response.sendStatus code
+  update: ({ passing, key }) =>
+    return (request, response) =>
+      { owner, repo, tag, state } = request.params
+      { date } = request.query
+      options = { owner, repo, tag, key: "#{key}.#{state}", passing, date }
+      @deployStateService.update options, (error, code) =>
+        return response.sendError error if error?
+        response.sendStatus code
 
   listDeployments: (request, response) =>
     { owner, repo } = request.params
@@ -73,9 +30,10 @@ class DeployStateController
       response.status(200).send { deployments }
 
   registerWebhook: (request, response) =>
-    { url } = request.body
+    { url, token } = request.body
     return response.sendStatus(422) unless url?
-    @deployStateService.registerWebhook { url }, (error, code) =>
+    return response.sendStatus(422) unless token?
+    @deployStateService.registerWebhook { url, token }, (error, code) =>
       return response.sendError error if error?
       response.sendStatus code
 

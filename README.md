@@ -19,6 +19,8 @@
   * [List Deployments](#list-deployments)
   * [Get Deployment](#get-deployment)
   * [Create Deployment](#create-deployment)
+  * [Register Webhook](#register-webhook)
+  * [Delete Webhook](#delete-webhook)
   * [Update Build Passed](#update-build-passed)
   * [Update Build Failed](#update-build-failed)
   * [Update Cluster Passed](#update-cluster-passed)
@@ -149,6 +151,35 @@ deployments: [
 ## Create Deployment
 
 `POST /deployments/:owner/:repo/:tag`
+
+## Register Webhook 
+
+Register a webhook to be triggered everytime a deployment is updated.
+
+When a deployment is changed, the deploy-state-service will hit the webhook, up to 3 times, until it gets 204 back. The request method is a POST, the header is 'Authentication: token the-secret-token', and the body is the deployment.
+
+`POST /webhooks`
+
+### Body
+
+```json
+{
+  "url": "https://my.deployment.client.octoblu.com/deployment/changed",
+  "token": "the-secret-token"
+}
+```
+
+## Delete Webhook 
+
+`DELETE /webhooks`
+
+### Body
+
+```json
+{
+  "url": "https://my.deployment.client.octoblu.com/deployment/changed"
+}
+```
 
 ## Update Build Passed 
 

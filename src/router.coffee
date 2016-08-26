@@ -10,10 +10,22 @@ class Router
     app.get  '/deployments/:owner/:repo', deployStateController.listDeployments
     app.get  '/deployments/:owner/:repo/:tag', deployStateController.getDeployment
     app.post '/deployments/:owner/:repo/:tag', deployStateController.createDeployment
-    app.put  '/deployments/:owner/:repo/:tag/build/:state/passed', deployStateController.updateBuildPassed
-    app.put  '/deployments/:owner/:repo/:tag/build/:state/failed', deployStateController.updateBuildFailed
-    app.put  '/deployments/:owner/:repo/:tag/cluster/:state/passed', deployStateController.updateClusterPassed
-    app.put  '/deployments/:owner/:repo/:tag/cluster/:state/failed', deployStateController.updateClusterFailed
+    app.put  '/deployments/:owner/:repo/:tag/build/:state/passed', deployStateController.update {
+      key: 'build',
+      passing: true
+    }
+    app.put  '/deployments/:owner/:repo/:tag/build/:state/failed', deployStateController.update {
+      key: 'build',
+      passing: false
+    }
+    app.put  '/deployments/:owner/:repo/:tag/cluster/:state/passed', deployStateController.update {
+      key: 'cluster',
+      passing: true
+    }
+    app.put  '/deployments/:owner/:repo/:tag/cluster/:state/failed', deployStateController.update {
+      key: 'cluster',
+      passing: false
+    }
     app.post '/webhooks', deployStateController.registerWebhook
     app.del  '/webhooks', deployStateController.deleteWebhook
     app.get  '/authorize', (request, response) => response.sendStatus(204)
