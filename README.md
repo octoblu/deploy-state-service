@@ -154,7 +154,7 @@ deployments: [
 
 ## Register Webhook 
 
-Register a webhook to be triggered everytime a deployment is updated.
+Register a webhook to be triggered everytime a deployment is updated, or created.
 
 When a deployment is changed, the deploy-state-service will hit the webhook, up to 3 times, until it gets 204 back. The request method is a POST, the header is 'Authentication: token the-secret-token', and the body is the deployment.
 

@@ -168,15 +168,9 @@ describe 'Update And Trigger Webhook', ->
         request.put options, (error, @response, @body) =>
           done error
 
-      it 'should return a 204', ->
+      it 'should return a 204 and hit up the webhook 3 times', ->
         expect(@response.statusCode).to.equal 204
-
-      it 'should retry the first webhook', ->
         @trigger1.done()
-
-      it 'should retry the second webhook', ->
         @trigger2.done()
-
-      it 'should retry the third webhook', ->
         @trigger3.done()
 

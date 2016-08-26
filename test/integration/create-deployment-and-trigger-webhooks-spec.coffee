@@ -1,11 +1,16 @@
-request = require 'request'
-mongojs = require 'mongojs'
-moment  = require 'moment'
-Server  = require '../../src/server'
+request       = require 'request'
+mongojs       = require 'mongojs'
+moment        = require 'moment'
+shmock        = require 'shmock'
+enableDestroy = require 'server-destroy'
+Server        = require '../../src/server'
 
-describe 'Create Deployment', ->
+describe 'Create Deployment and Trigger Webhooks', ->
   beforeEach (done) ->
     @logFn = sinon.spy()
+
+    @webhookClient = shmock 0xbabe
+    enableDestroy @webhookClient
 
     serverOptions =
       port: undefined,
@@ -21,7 +26,6 @@ describe 'Create Deployment', ->
     @webhooks = database.webhooks
     @webhooks.drop()
 
-
     @server = new Server serverOptions
 
     @server.run =>
@@ -30,16 +34,43 @@ describe 'Create Deployment', ->
 
   afterEach ->
     @server.destroy()
+    @webhookClient.destroy()
 
   describe 'on POST /deployments/:owner/:repo/:tag', ->
+    beforeEach (done) ->
+      @webhooks.insert [
+        { url: "http://localhost:#{0xbabe}/trigger1", token: 'trigger-1-secret' }
+        { url: "http://localhost:#{0xbabe}/trigger2", token: 'trigger-2-secret' }
+      ], done
+
     describe 'when does not exist', ->
       beforeEach (done) ->
+        deployment =
+          repo: 'the-service'
+          owner: 'the-owner'
+          tag: 'v1.0.0'
+          createdAt: moment('2002-02-02').valueOf()
+          build: {}
+          cluster: {}
+
+        @trigger1 = @webhookClient.post('/trigger1')
+          .set 'Authorization', 'token trigger-1-secret'
+          .send deployment
+          .reply(204)
+
+        @trigger2 = @webhookClient.post('/trigger2')
+          .set 'Authorization', 'token trigger-2-secret'
+          .send deployment
+          .reply(204)
+
         options =
           uri: '/deployments/the-owner/the-service/v1.0.0'
           baseUrl: "http://localhost:#{@serverPort}"
           headers:
             Authorization: 'token deploy-state-key'
           json: true
+          qs:
+            date: moment('2002-02-02').valueOf()
 
         request.post options, (error, @response, @body) =>
           done error
@@ -50,6 +81,12 @@ describe 'Create Deployment', ->
       it 'should have a "Created"', ->
         expect(@body).to.equal 'Created'
 
+      it 'should trigger the first webhook', ->
+        @trigger1.done()
+
+      it 'should trigger the second webhook', ->
+        @trigger2.done()
+
       describe 'when the database record is checked', ->
         beforeEach (done) ->
           query = { owner: 'the-owner', repo: 'the-service', tag: 'v1.0.0' }
@@ -57,8 +94,7 @@ describe 'Create Deployment', ->
             done error
 
         it 'should have a valid created at date', ->
-          expect(moment(@record.createdAt).isBefore(moment())).to.be.true
-          expect(moment(@record.createdAt).isAfter(moment().subtract(1, 'minute'))).to.be.true
+          expect(moment(@record.createdAt).valueOf()).to.equal moment('2002-02-02').valueOf()
 
         it 'should have an empty build', ->
           expect(@record.build).to.deep.equal {}

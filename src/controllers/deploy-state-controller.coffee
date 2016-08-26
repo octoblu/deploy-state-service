@@ -10,7 +10,8 @@ class DeployStateController
 
   createDeployment: (request, response) =>
     { owner, repo, tag } = request.params
-    @deployStateService.createDeployment { owner, repo, tag }, (error, code) =>
+    { date } = request.query
+    @deployStateService.createDeployment { owner, repo, tag, date }, (error, code) =>
       return response.sendError error if error?
       response.sendStatus code
 

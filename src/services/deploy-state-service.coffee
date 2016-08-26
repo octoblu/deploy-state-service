@@ -23,7 +23,7 @@ class DeployStateService
       return callback @_createError(404, 'Unable to find deployment') unless deployment?
       callback null, deployment
 
-  createDeployment: ({ owner, repo, tag }, callback) =>
+  createDeployment: ({ owner, repo, tag, date }, callback) =>
     @_findDeployment { owner, repo, tag }, (error, deployment) =>
       return callback error if error?
       return callback null, 204 if deployment?
@@ -33,11 +33,13 @@ class DeployStateService
         tag,
         build: {},
         cluster: {},
-        createdAt: new Date()
+        createdAt: @_getDate(date)
       }
       @deployments.insert record, (error) =>
         return callback error if error?
-        callback null, 201
+        @_notifyAll { owner, repo, tag }, (error) =>
+          return callback error if error?
+          callback null, 201
 
   update: ({ owner, repo, tag, key, passing, date }, callback) =>
     @_findDeployment { owner, repo, tag }, (error, deployment) =>
@@ -46,12 +48,9 @@ class DeployStateService
 
       query = {}
       query["#{key}.passing"] = passing
-      date = moment(parseInt(date)) if date? && /^[0-9]+$/.test date
-      date ?= moment(date) if date?
-      date ?= moment()
 
-      query["#{key}.createdAt"] = date.toDate() unless _.get deployment, "#{key}.createdAt"
-      query["#{key}.updatedAt"] = date.toDate() if _.get deployment, "#{key}.createdAt"
+      query["#{key}.createdAt"] = @_getDate(date) unless _.get deployment, "#{key}.createdAt"
+      query["#{key}.updatedAt"] = @_getDate(date) if _.get deployment, "#{key}.createdAt"
 
       @deployments.update { owner, repo, tag }, { $set: query }, (error) =>
         return callback error if error?
@@ -102,6 +101,12 @@ class DeployStateService
       return callback new Error 'Fatal error from webhook' if response.statusCode >= 500
       return callback new Error 'Non-204 statusCode from webhook' unless response.statusCode == 204
       callback null
+
+  _getDate: (date) =>
+    newDate = moment(parseInt(date)) if date? && /^[0-9]+$/.test date
+    newDate ?= moment(date) if date?
+    newDate ?= moment()
+    return newDate.toDate()
 
   _findDeployment: ({ owner, repo, tag }, callback) =>
     @deployments.findOne { owner, repo, tag }, PROJECTION, (error, deployment) =>
