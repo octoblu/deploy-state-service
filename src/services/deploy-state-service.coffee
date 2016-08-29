@@ -80,11 +80,11 @@ class DeployStateService
   listDeployments: ({ owner, repo }, callback) =>
     @_findDeployments { owner, repo }, callback
 
-  registerWebhook: ({ url, token }, callback) =>
+  registerWebhook: ({ url, authorization }, callback) =>
     @webhooks.findOne { url }, (error, webhook) =>
       return callback error if error?
       return callback null, 204 if webhook?
-      @webhooks.insert { url, token }, (error) =>
+      @webhooks.insert { url, authorization }, (error) =>
         return callback error if error?
         callback null, 201
 
@@ -111,11 +111,11 @@ class DeployStateService
         return callback error if error?
         async.each webhooks, async.apply(@_tryAndNotify, command, deployment), callback
 
-  _tryAndNotify: (command, deployment, { url, token }, callback) =>
+  _tryAndNotify: (command, deployment, { url, authorization }, callback) =>
     options = { times: 3, interval: 500 }
-    async.retry options, async.apply(@_notify, command, deployment, { url, token }), => callback null
+    async.retry options, async.apply(@_notify, command, deployment, { url, authorization }), => callback null
 
-  _notify: (command, deployment, { url, token }, callback) =>
+  _notify: (command, deployment, { url, authorization }, callback) =>
     method = 'PUT'
     method = 'POST' if command == 'create'
     statusCode = 204
@@ -124,7 +124,7 @@ class DeployStateService
       url,
       method,
       headers:
-        Authorization: "token #{token}"
+        Authorization: authorization
       json: deployment
     }
     request options, (error, response, body) =>

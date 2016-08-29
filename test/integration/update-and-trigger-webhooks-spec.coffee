@@ -38,8 +38,8 @@ describe 'Update And Trigger Webhook', ->
     describe 'when the deployment exists', ->
       beforeEach (done) ->
         @db.webhooks.insert [
-          { url: "http://localhost:#{0xbabe}/trigger1", token: 'trigger-1-secret' }
-          { url: "http://localhost:#{0xbabe}/trigger2", token: 'trigger-2-secret' }
+          { url: "http://localhost:#{0xbabe}/trigger1", authorization: 'token trigger-1-secret' }
+          { url: "http://localhost:#{0xbabe}/trigger2", authorization: 'token trigger-2-secret' }
         ], done
 
       beforeEach (done) ->
@@ -108,8 +108,8 @@ describe 'Update And Trigger Webhook', ->
     describe 'when the webhook returns a non-204', ->
       beforeEach (done) ->
         @db.webhooks.insert [
-          { url: "http://localhost:#{0xbabe}/trigger", token: 'trigger-secret' }
-          { url: "http://localhost:#{0xbabe}/trigger-success", token: 'trigger-secret' }
+          { url: "http://localhost:#{0xbabe}/trigger", authorization: 'token trigger-secret' }
+          { url: "http://localhost:#{0xbabe}/trigger-success", authorization: 'token trigger-secret' }
         ], done
 
       beforeEach (done) ->

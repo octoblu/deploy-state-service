@@ -174,13 +174,13 @@ Register a webhook to be triggered everytime a deployment is updated, or created
 ```json
 {
   "url": "https://my.deployment.client.octoblu.com/deployment/changed",
-  "token": "the-secret-token"
+  "authorization": "token the-secret-token"
 }
 ```
 
-When a deployment is created, the deploy-state-service will hit the webhook, up to 3 times, until it gets 201 back. The request method is a POST, the header is 'Authentication: token the-secret-token', and the body is the deployment.
+When a deployment is created, the deploy-state-service will hit the webhook, up to 3 times, until it gets 201 back. The request method is a POST and the Authorization header is set to the authorization value on the registered webhook.
 
-When a deployment is updated, the deploy-state-service will hit the webhook, up to 3 times, until it gets 204 back. The request method is a PUT, the header is 'Authentication: token the-secret-token', and the body is the deployment.
+When a deployment is updated, the deploy-state-service will hit the webhook, up to 3 times, until it gets 204 back. The request method is a PUT, and the Authorization header is set to the authorization value on the registered webhook.
 
 
 ## Delete Webhook 

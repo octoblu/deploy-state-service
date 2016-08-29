@@ -37,8 +37,8 @@ describe 'Create Deployment and Trigger Webhooks', ->
   describe 'on POST /deployments/:owner/:repo/:tag', ->
     beforeEach (done) ->
       @db.webhooks.insert [
-        { url: "http://localhost:#{0xbabe}/trigger1", token: 'trigger-1-secret' }
-        { url: "http://localhost:#{0xbabe}/trigger2", token: 'trigger-2-secret' }
+        { url: "http://localhost:#{0xbabe}/trigger1", authorization: 'token trigger-1-secret' }
+        { url: "http://localhost:#{0xbabe}/trigger2", authorization: 'token trigger-2-secret' }
       ], done
 
     describe 'when does not exist', ->

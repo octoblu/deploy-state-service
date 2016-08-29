@@ -36,7 +36,7 @@ describe 'Register Webhook', ->
             Authorization: 'token deploy-state-key'
           json:
             url: 'https://some.testing.dev/webhook'
-            token: 'webhook-secret-token'
+            authorization: 'token webhook-secret-token'
 
         request.post options, (error, @response, @body) =>
           done error
@@ -52,14 +52,14 @@ describe 'Register Webhook', ->
         it 'should have a url', ->
           expect(@record.url).to.equal 'https://some.testing.dev/webhook'
 
-        it 'should have a token', ->
-          expect(@record.token).to.equal 'webhook-secret-token'
+        it 'should have the authorization stored', ->
+          expect(@record.authorization).to.equal 'token webhook-secret-token'
 
     describe 'when it already exists', ->
       beforeEach (done) ->
         record =
           url: 'https://some.testing.dev/webhook'
-          token: 'hi'
+          authorization: 'token hi'
         @db.webhooks.insert record, done
 
       beforeEach (done) ->
@@ -70,7 +70,7 @@ describe 'Register Webhook', ->
             Authorization: 'token deploy-state-key'
           json:
             url: 'https://some.testing.dev/webhook'
-            token: 'hello'
+            authorization: 'hello'
 
         request.post options, (error, @response, @body) =>
           done error
@@ -86,8 +86,8 @@ describe 'Register Webhook', ->
         it 'should have a url', ->
           expect(@record.url).to.equal 'https://some.testing.dev/webhook'
 
-        it 'should have original token', ->
-          expect(@record.token).to.equal 'hi'
+        it 'should have original authorization', ->
+          expect(@record.authorization).to.equal 'token hi'
 
     describe 'when it is missing the url', ->
       beforeEach (done) ->
@@ -104,7 +104,7 @@ describe 'Register Webhook', ->
       it 'should return a 422', ->
         expect(@response.statusCode).to.equal 422
 
-    describe 'when it is missing the token', ->
+    describe 'when it is missing the authorization', ->
       beforeEach (done) ->
         options =
           uri: '/webhooks'
