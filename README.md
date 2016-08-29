@@ -15,6 +15,7 @@
     * [Development](#development)
     * [Production](#production)
   * [Debugging](#debugging)
+* [Clients](#clients)
 * [API](#api)
   * [List Deployments](#list-deployments)
   * [Get Deployment](#get-deployment)
@@ -77,6 +78,12 @@ docker run --rm -it --name deploy-state-service-local -p 8888:80 local/deploy-st
 docker pull quay.io/octoblu/deploy-state-service
 docker run --rm -p 8888:80 quay.io/octoblu/deploy-state-service
 ```
+
+# Clients
+
+A client should register a webhook with the deploy state service.
+
+We've created an [Etcd Deploy Service](https://github.com/octoblu/etcd-deploy-service) for our current deployment stack.
 
 # API
 
@@ -158,8 +165,6 @@ deployments: [
 
 Register a webhook to be triggered everytime a deployment is updated, or created.
 
-When a deployment is created, or changed, the deploy-state-service will hit the webhook, up to 3 times, until it gets 204 back. The request method is a POST (for create) and PUT (for update), the header is 'Authentication: token the-secret-token', and the body is the deployment.
-
 `POST /webhooks`
 
 ### Body
@@ -170,6 +175,11 @@ When a deployment is created, or changed, the deploy-state-service will hit the 
   "token": "the-secret-token"
 }
 ```
+
+When a deployment is created, the deploy-state-service will hit the webhook, up to 3 times, until it gets 201 back. The request method is a POST, the header is 'Authentication: token the-secret-token', and the body is the deployment.
+
+When a deployment is updated, the deploy-state-service will hit the webhook, up to 3 times, until it gets 204 back. The request method is a PUT, the header is 'Authentication: token the-secret-token', and the body is the deployment.
+
 
 ## Delete Webhook 
 

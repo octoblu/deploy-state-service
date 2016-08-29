@@ -37,7 +37,7 @@ class DeployStateService
       }
       @deployments.insert record, (error) =>
         return callback error if error?
-        @_notifyAll 'POST', { owner, repo, tag }, (error) =>
+        @_notifyAll 'create', { owner, repo, tag }, (error) =>
           return callback error if error?
           callback null, 201
 
@@ -54,7 +54,7 @@ class DeployStateService
 
       @deployments.update { owner, repo, tag }, { $set: query }, (error) =>
         return callback error if error?
-        @_notifyAll 'PUT', { owner, repo, tag }, (error) =>
+        @_notifyAll 'update', { owner, repo, tag }, (error) =>
           return callback error if error?
           callback null, 204
 
@@ -81,19 +81,23 @@ class DeployStateService
     return false unless passing
     return _.some _.values(deployment.build), { passing: false }
 
-  _notifyAll: (method, { owner, repo, tag }, callback) =>
+  _notifyAll: (command, { owner, repo, tag }, callback) =>
     @webhooks.find {}, (error, webhooks) =>
       return callback error if error?
       return callback null if _.isEmpty webhooks
       @_findDeployment { owner, repo, tag }, (error, deployment) =>
         return callback error if error?
-        async.each webhooks, async.apply(@_tryAndNotify, method, deployment), callback
+        async.each webhooks, async.apply(@_tryAndNotify, command, deployment), callback
 
-  _tryAndNotify: (method, deployment, { url, token }, callback) =>
+  _tryAndNotify: (command, deployment, { url, token }, callback) =>
     options = { times: 3, interval: 500 }
-    async.retry options, async.apply(@_notify, method, deployment, { url, token }), callback
+    async.retry options, async.apply(@_notify, command, deployment, { url, token }), callback
 
-  _notify: (method, deployment, { url, token }, callback) =>
+  _notify: (command, deployment, { url, token }, callback) =>
+    method = 'PUT'
+    method = 'POST' if command == 'create'
+    statusCode = 204
+    statusCode = 201 if command == 'create'
     options = {
       url,
       method,
@@ -104,7 +108,7 @@ class DeployStateService
     request options, (error, response, body) =>
       return callback error if error?
       return callback new Error 'Fatal error from webhook' if response.statusCode >= 500
-      return callback new Error 'Non-204 statusCode from webhook' unless response.statusCode == 204
+      return callback new Error "Non-#{statusCode} statusCode from webhook" unless response.statusCode == statusCode
       callback null
 
   _getDate: (date) =>

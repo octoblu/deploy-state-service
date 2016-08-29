@@ -54,12 +54,12 @@ describe 'Create Deployment and Trigger Webhooks', ->
         @trigger1 = @webhookClient.post('/trigger1')
           .set 'Authorization', 'token trigger-1-secret'
           .send deployment
-          .reply(204)
+          .reply(201)
 
         @trigger2 = @webhookClient.post('/trigger2')
           .set 'Authorization', 'token trigger-2-secret'
           .send deployment
-          .reply(204)
+          .reply(201)
 
         options =
           uri: '/deployments/the-owner/the-service/v1.0.0'
