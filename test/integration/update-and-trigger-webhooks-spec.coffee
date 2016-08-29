@@ -49,6 +49,7 @@ describe 'Update And Trigger Webhook', ->
           owner: 'the-owner'
           createdAt: moment('2001-01-01').toDate()
           build: {
+            passing: false,
             "travis-ci": {
               passing: false,
               createdAt: moment('2001-01-01').toDate()
@@ -64,6 +65,7 @@ describe 'Update And Trigger Webhook', ->
           owner: 'the-owner'
           createdAt: moment('2001-01-01').valueOf()
           build: {
+            passing: true,
             "travis-ci": {
               passing: true,
               updatedAt: moment('2002-02-02').valueOf()
@@ -72,12 +74,12 @@ describe 'Update And Trigger Webhook', ->
           }
           cluster: {}
 
-        @trigger1 = @webhookClient.post('/trigger1')
+        @trigger1 = @webhookClient.put('/trigger1')
           .set 'Authorization', 'token trigger-1-secret'
           .send deployment
           .reply(204)
 
-        @trigger2 = @webhookClient.post('/trigger2')
+        @trigger2 = @webhookClient.put('/trigger2')
           .set 'Authorization', 'token trigger-2-secret'
           .send deployment
           .reply(204)
@@ -116,6 +118,7 @@ describe 'Update And Trigger Webhook', ->
           owner: 'the-owner'
           createdAt: moment('2001-01-01').toDate()
           build: {
+            passing: false,
             "travis-ci": {
               passing: false,
               createdAt: moment('2001-01-01').toDate()
@@ -131,6 +134,7 @@ describe 'Update And Trigger Webhook', ->
           owner: 'the-owner'
           createdAt: moment('2001-01-01').valueOf()
           build: {
+            passing: true,
             "travis-ci": {
               passing: true,
               updatedAt: moment('2002-02-02').valueOf()
@@ -139,17 +143,17 @@ describe 'Update And Trigger Webhook', ->
           }
           cluster: {}
 
-        @trigger1 = @webhookClient.post('/trigger')
+        @trigger1 = @webhookClient.put('/trigger')
           .set 'Authorization', 'token trigger-secret'
           .send deployment
           .reply(503)
 
-        @trigger2 = @webhookClient.post('/trigger')
+        @trigger2 = @webhookClient.put('/trigger')
           .set 'Authorization', 'token trigger-secret'
           .send deployment
           .reply(422)
 
-        @trigger3 = @webhookClient.post('/trigger')
+        @trigger3 = @webhookClient.put('/trigger')
           .set 'Authorization', 'token trigger-secret'
           .send deployment
           .reply(204)

@@ -58,8 +58,8 @@ describe 'Create Deployment', ->
           expect(moment(@record.createdAt).isBefore(moment())).to.be.true
           expect(moment(@record.createdAt).isAfter(moment().subtract(1, 'minute'))).to.be.true
 
-        it 'should have an empty build', ->
-          expect(@record.build).to.deep.equal {}
+        it 'should have an non-passing build', ->
+          expect(@record.build).to.deep.equal { passing: false }
 
         it 'should have an empty cluster', ->
           expect(@record.cluster).to.deep.equal {}

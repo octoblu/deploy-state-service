@@ -48,7 +48,7 @@ describe 'Create Deployment and Trigger Webhooks', ->
           owner: 'the-owner'
           tag: 'v1.0.0'
           createdAt: moment('2002-02-02').valueOf()
-          build: {}
+          build: { passing: false }
           cluster: {}
 
         @trigger1 = @webhookClient.post('/trigger1')
@@ -94,8 +94,8 @@ describe 'Create Deployment and Trigger Webhooks', ->
         it 'should have a valid created at date', ->
           expect(moment(@record.createdAt).valueOf()).to.equal moment('2002-02-02').valueOf()
 
-        it 'should have an empty build', ->
-          expect(@record.build).to.deep.equal {}
+        it 'should have a non-passing build', ->
+          expect(@record.build).to.deep.equal { passing: false }
 
         it 'should have an empty cluster', ->
           expect(@record.cluster).to.deep.equal {}

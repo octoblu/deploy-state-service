@@ -98,6 +98,7 @@ deployments: [
     tag  : "v1.0.0"
     createdAt: 100000000
     build: {
+      passing: true,
       "travis-ci": {
         passing: true
         createdAt: 10000000
@@ -130,6 +131,7 @@ deployments: [
   tag  : "v1.0.0"
   createdAt: 100000000
   build: {
+    passing: true,
     "travis-ci": {
       passing: true
       createdAt: 10000000
@@ -156,7 +158,7 @@ deployments: [
 
 Register a webhook to be triggered everytime a deployment is updated, or created.
 
-When a deployment is changed, the deploy-state-service will hit the webhook, up to 3 times, until it gets 204 back. The request method is a POST, the header is 'Authentication: token the-secret-token', and the body is the deployment.
+When a deployment is created, or changed, the deploy-state-service will hit the webhook, up to 3 times, until it gets 204 back. The request method is a POST (for create) and PUT (for update), the header is 'Authentication: token the-secret-token', and the body is the deployment.
 
 `POST /webhooks`
 

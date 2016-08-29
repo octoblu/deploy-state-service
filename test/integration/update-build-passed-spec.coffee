@@ -55,7 +55,7 @@ describe 'Update Build Passed', ->
             repo: 'the-service'
             owner: 'the-owner'
             createdAt: moment('2001-01-01').toDate()
-            build: {}
+            build: { passing: false }
             cluster: {}
           @db.deployments.insert deployment, done
 
@@ -97,6 +97,7 @@ describe 'Update Build Passed', ->
             owner: 'the-owner'
             createdAt: moment('2001-01-01').toDate()
             build: {
+              passing: false,
               "travis-ci": {
                 passing: false,
                 createdAt: moment('2001-01-01').toDate()
@@ -127,6 +128,9 @@ describe 'Update Build Passed', ->
             query = { owner: 'the-owner', repo: 'the-service', tag: 'v1.0.0' }
             @db.deployments.findOne query, (error, @record) =>
               done error
+
+          it 'should have a passing build', ->
+            expect(@record.build.passing).to.be.true
 
           it 'should have a travis-ci set to passed', ->
             expect(@record.build["travis-ci"].passing).to.be.true

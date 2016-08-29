@@ -31,13 +31,13 @@ class DeployStateService
         owner,
         repo,
         tag,
-        build: {},
+        build: { passing: false },
         cluster: {},
         createdAt: @_getDate(date)
       }
       @deployments.insert record, (error) =>
         return callback error if error?
-        @_notifyAll { owner, repo, tag }, (error) =>
+        @_notifyAll 'POST', { owner, repo, tag }, (error) =>
           return callback error if error?
           callback null, 201
 
@@ -47,14 +47,14 @@ class DeployStateService
       return callback null, 404 unless deployment?
 
       query = {}
+      query["build.passing"]  = @_buildPassing deployment, passing
       query["#{key}.passing"] = passing
-
       query["#{key}.createdAt"] = @_getDate(date) unless _.get deployment, "#{key}.createdAt"
       query["#{key}.updatedAt"] = @_getDate(date) if _.get deployment, "#{key}.createdAt"
 
       @deployments.update { owner, repo, tag }, { $set: query }, (error) =>
         return callback error if error?
-        @_notifyAll { owner, repo, tag }, (error) =>
+        @_notifyAll 'PUT', { owner, repo, tag }, (error) =>
           return callback error if error?
           callback null, 204
 
@@ -77,26 +77,31 @@ class DeployStateService
         return callback error if error?
         callback null, 204
 
-  _notifyAll: ({ owner, repo, tag }, callback) =>
+  _buildPassing: (deployment, passing) =>
+    return false unless passing
+    return _.some _.values(deployment.build), { passing: false }
+
+  _notifyAll: (method, { owner, repo, tag }, callback) =>
     @webhooks.find {}, (error, webhooks) =>
       return callback error if error?
       return callback null if _.isEmpty webhooks
       @_findDeployment { owner, repo, tag }, (error, deployment) =>
         return callback error if error?
-        async.each webhooks, async.apply(@_tryAndNotify, deployment), callback
+        async.each webhooks, async.apply(@_tryAndNotify, method, deployment), callback
 
-  _tryAndNotify: (deployment, { url, token }, callback) =>
+  _tryAndNotify: (method, deployment, { url, token }, callback) =>
     options = { times: 3, interval: 500 }
-    async.retry options, async.apply(@_notify, deployment, { url, token }), callback
+    async.retry options, async.apply(@_notify, method, deployment, { url, token }), callback
 
-  _notify: (deployment, { url, token }, callback) =>
+  _notify: (method, deployment, { url, token }, callback) =>
     options = {
       url,
+      method,
       headers:
         Authorization: "token #{token}"
       json: deployment
     }
-    request.post options, (error, response) =>
+    request options, (error, response, body) =>
       return callback error if error?
       return callback new Error 'Fatal error from webhook' if response.statusCode >= 500
       return callback new Error 'Non-204 statusCode from webhook' unless response.statusCode == 204

@@ -32,7 +32,7 @@ describe 'Update Cluster Passed', ->
     describe 'when the deployment does NOT exist', ->
       beforeEach (done) ->
         options =
-          uri: '/deployments/the-owner/the-service/v1.0.0/cluster/travis-ci/passed'
+          uri: '/deployments/the-owner/the-service/v1.0.0/cluster/major/passed'
           baseUrl: "http://localhost:#{@serverPort}"
           headers:
             Authorization: 'token deploy-state-key'
@@ -60,7 +60,7 @@ describe 'Update Cluster Passed', ->
 
         beforeEach (done) ->
           options =
-            uri: '/deployments/the-owner/the-service/v1.0.0/cluster/travis-ci/passed'
+            uri: '/deployments/the-owner/the-service/v1.0.0/cluster/major/passed'
             baseUrl: "http://localhost:#{@serverPort}"
             headers:
               Authorization: 'token deploy-state-key'
@@ -81,12 +81,12 @@ describe 'Update Cluster Passed', ->
             @db.deployments.findOne query, (error, @record) =>
               done error
 
-          it 'should have a travis-ci set to passed', ->
-            expect(@record.cluster["travis-ci"].passing).to.be.true
+          it 'should have a major set to passed', ->
+            expect(@record.cluster["major"].passing).to.be.true
 
-          it 'should have a valid created at date for travis-ci', ->
-            expect(moment(@record.cluster["travis-ci"].createdAt).isBefore(moment())).to.be.true
-            expect(moment(@record.cluster["travis-ci"].createdAt).isAfter(moment().subtract(1, 'minute'))).to.be.true
+          it 'should have a valid created at date for major', ->
+            expect(moment(@record.cluster["major"].createdAt).isBefore(moment())).to.be.true
+            expect(moment(@record.cluster["major"].createdAt).isAfter(moment().subtract(1, 'minute'))).to.be.true
 
       describe 'when the cluster exists', ->
         beforeEach (done) ->
@@ -96,7 +96,7 @@ describe 'Update Cluster Passed', ->
             owner: 'the-owner'
             createdAt: moment('2001-01-01').toDate()
             cluster: {
-              "travis-ci": {
+              "major": {
                 passing: false,
                 createdAt: moment('2001-01-01').toDate()
               }
@@ -105,7 +105,7 @@ describe 'Update Cluster Passed', ->
 
         beforeEach (done) ->
           options =
-            uri: '/deployments/the-owner/the-service/v1.0.0/cluster/travis-ci/passed'
+            uri: '/deployments/the-owner/the-service/v1.0.0/cluster/major/passed'
             baseUrl: "http://localhost:#{@serverPort}"
             headers:
               Authorization: 'token deploy-state-key'
@@ -126,13 +126,13 @@ describe 'Update Cluster Passed', ->
             @db.deployments.findOne query, (error, @record) =>
               done error
 
-          it 'should have a travis-ci set to passed', ->
-            expect(@record.cluster["travis-ci"].passing).to.be.true
+          it 'should have a major set to passed', ->
+            expect(@record.cluster["major"].passing).to.be.true
 
-          it 'should have a valid createdAt date for travis-ci', ->
-            expect(moment(@record.cluster["travis-ci"].createdAt).valueOf()).to.be.equal moment('2001-01-01').valueOf()
+          it 'should have a valid createdAt date for major', ->
+            expect(moment(@record.cluster["major"].createdAt).valueOf()).to.be.equal moment('2001-01-01').valueOf()
 
-          it 'should have a valid updatedAt date for travis-ci', ->
-            expect(moment(@record.cluster["travis-ci"].updatedAt).isBefore(moment())).to.be.true
-            expect(moment(@record.cluster["travis-ci"].updatedAt).isAfter(moment().subtract(1, 'minute'))).to.be.true
+          it 'should have a valid updatedAt date for major', ->
+            expect(moment(@record.cluster["major"].updatedAt).isBefore(moment())).to.be.true
+            expect(moment(@record.cluster["major"].updatedAt).isAfter(moment().subtract(1, 'minute'))).to.be.true
 

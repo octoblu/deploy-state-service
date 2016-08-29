@@ -38,6 +38,7 @@ describe 'Get Deployment', ->
           owner: 'the-owner'
           createdAt: moment('2001-01-01').toDate()
           build:
+            passing: true
             "travis-ci":
               passing: true,
               createdAt: moment('2001-01-01').toDate()
@@ -81,6 +82,9 @@ describe 'Get Deployment', ->
 
       it 'should have valid createdAt', ->
         expect(@body.createdAt).to.be.equal moment('2001-01-01').valueOf()
+
+      it 'should have passing build', ->
+        expect(@body.build.passing).to.be.true
 
       it 'should have travis passing', ->
         expect(@body.build["travis-ci"].passing).to.be.true

@@ -37,6 +37,7 @@ describe 'List Deployments', ->
           owner: 'the-owner'
           createdAt: moment('2001-01-01').toDate()
           build:
+            passing: true
             "travis-ci":
               passing: true,
               createdAt: moment('2001-01-01').toDate()
@@ -59,6 +60,7 @@ describe 'List Deployments', ->
           owner: 'the-owner'
           createdAt: moment('2001-01-01').toDate()
           build:
+            passing: false
             "travis-ci":
               passing: true,
               createdAt: moment('2001-01-01').toDate()
@@ -91,6 +93,7 @@ describe 'List Deployments', ->
             owner: 'the-owner'
             createdAt: moment('2001-01-01').valueOf()
             build:
+              passing: true,
               "travis-ci":
                 passing: true,
                 createdAt: moment('2001-01-01').valueOf()
@@ -111,6 +114,7 @@ describe 'List Deployments', ->
             owner: 'the-owner'
             createdAt: moment('2001-01-01').valueOf()
             build:
+              passing: false,
               "travis-ci":
                 passing: true,
                 createdAt: moment('2001-01-01').valueOf()

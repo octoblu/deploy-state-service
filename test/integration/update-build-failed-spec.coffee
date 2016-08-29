@@ -82,6 +82,9 @@ describe 'Update Build Failed', ->
             @db.deployments.findOne query, (error, @record) =>
               done error
 
+          it 'should have a failed build', ->
+            expect(@record.build.passing).to.be.false
+
           it 'should have a travis-ci set to failed', ->
             expect(@record.build["travis-ci"].passing).to.be.false
 
@@ -97,6 +100,7 @@ describe 'Update Build Failed', ->
             owner: 'the-owner'
             createdAt: moment('2001-01-01').toDate()
             build: {
+              passing: true
               "travis-ci": {
                 passing: true,
                 createdAt: moment('2001-01-01').toDate()
@@ -127,6 +131,9 @@ describe 'Update Build Failed', ->
             query = { owner: 'the-owner', repo: 'the-service', tag: 'v1.0.0' }
             @db.deployments.findOne query, (error, @record) =>
               done error
+
+          it 'should have a non-passing build', ->
+            expect(@record.build.passing).to.be.false
 
           it 'should have a travis-ci set to failed', ->
             expect(@record.build["travis-ci"].passing).to.be.false
