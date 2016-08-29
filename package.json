@@ -1,6 +1,6 @@
 {
   "name": "deploy-state-service",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "description": "Micro-service for deploying micro-services",
   "keywords": [
     "Octoblu",
