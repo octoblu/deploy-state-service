@@ -104,6 +104,7 @@ deployments: [
     owner: "octoblu"
     tag  : "v1.0.0"
     createdAt: 100000000
+    dockerUrl: 'quay.io/octoblu/weather-service:v1.0.0'
     build: {
       passing: true,
       "travis-ci": {
@@ -137,6 +138,7 @@ deployments: [
   owner: "octoblu"
   tag  : "v1.0.0"
   createdAt: 100000000
+  dockerUrl: 'quay.io/octoblu/weather-service:v1.0.0'
   build: {
     passing: true,
     "travis-ci": {

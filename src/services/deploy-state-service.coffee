@@ -47,7 +47,7 @@ class DeployStateService
       return callback null, 404 unless deployment?
 
       query = {}
-      query["build.passing"]  = @_buildPassing deployment, passing
+      query["build.passing"]  = @_buildPassing deployment, "#{key}.passing", passing
       query["#{key}.passing"] = passing
       query["#{key}.createdAt"] = @_getDate(date) unless _.get deployment, "#{key}.createdAt"
       query["#{key}.updatedAt"] = @_getDate(date) if _.get deployment, "#{key}.createdAt"
@@ -57,6 +57,25 @@ class DeployStateService
         @_notifyAll 'update', { owner, repo, tag }, (error) =>
           return callback error if error?
           callback null, 204
+
+  updateFromQuay: ({ repository, docker_url, tag, date }, callback) =>
+    [ owner, repo ] = repository.split '/'
+    @_findDeployment { owner, repo, tag }, (error, deployment) =>
+      return callback error if error?
+      return callback null, 404 unless deployment?
+
+      query = {}
+      query["build.passing"]  = @_buildPassing deployment, "build.docker.passing", true
+      query["build.dockerUrl"] = docker_url
+      query["build.docker.passing"] = true
+      query["build.docker.createdAt"] = @_getDate(date) unless _.get deployment, "build.docker.createdAt"
+      query["build.docker.updatedAt"] = @_getDate(date) if _.get deployment, "build.docker.createdAt"
+
+      @deployments.update { owner, repo, tag }, { $set: query }, (error) =>
+        return callback error if error?
+        @_notifyAll 'update', { owner, repo, tag }, (error) =>
+          return callback error if error?
+          callback null, 201
 
   listDeployments: ({ owner, repo }, callback) =>
     @_findDeployments { owner, repo }, callback
@@ -77,9 +96,12 @@ class DeployStateService
         return callback error if error?
         callback null, 204
 
-  _buildPassing: (deployment, passing) =>
-    return false unless passing
-    return _.some _.values(deployment.build), { passing: false }
+  _buildPassing: (deployment, key, value) =>
+    deployment = _.cloneDeep deployment
+    _.set deployment, key, value
+    return false unless _.get deployment, "build.travis-ci.passing"
+    return false unless _.get deployment, "build.docker.passing"
+    return true
 
   _notifyAll: (command, { owner, repo, tag }, callback) =>
     @webhooks.find {}, (error, webhooks) =>

@@ -39,6 +39,7 @@ describe 'Get Deployment', ->
           createdAt: moment('2001-01-01').toDate()
           build:
             passing: true
+            dockerUrl: 'quay.io/the-owner/the-service:v1.0.0'
             "travis-ci":
               passing: true,
               createdAt: moment('2001-01-01').toDate()
@@ -85,6 +86,9 @@ describe 'Get Deployment', ->
 
       it 'should have passing build', ->
         expect(@body.build.passing).to.be.true
+
+      it 'should have a dockerUrl in the build', ->
+        expect(@body.build.dockerUrl).to.equal 'quay.io/the-owner/the-service:v1.0.0'
 
       it 'should have travis passing', ->
         expect(@body.build["travis-ci"].passing).to.be.true

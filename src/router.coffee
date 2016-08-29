@@ -10,6 +10,7 @@ class Router
     app.get    '/deployments/:owner/:repo', deployStateController.listDeployments
     app.get    '/deployments/:owner/:repo/:tag', deployStateController.getDeployment
     app.post   '/deployments/:owner/:repo/:tag', deployStateController.createDeployment
+    app.post   '/deployments/quay.io', deployStateController.updateFromQuay
     app.put    '/deployments/:owner/:repo/:tag/build/:state/passed', deployStateController.update {
       key: 'build',
       passing: true

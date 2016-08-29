@@ -3,7 +3,7 @@ moment   = require 'moment'
 Database = require '../database'
 Server   = require '../../src/server'
 
-describe 'Update Build Passed', ->
+describe 'Update From Quay', ->
   beforeEach (done) ->
     @db = new Database
     @db.drop done
@@ -28,17 +28,20 @@ describe 'Update Build Passed', ->
   afterEach ->
     @server.destroy()
 
-  describe 'on PUT /deployments/:owner/:repo/:tag/build/:state/passed', ->
+  describe 'on POST /deployments/quay.io', ->
     describe 'when the deployment does NOT exist', ->
       beforeEach (done) ->
         options =
-          uri: '/deployments/the-owner/the-service/v1.0.0/build/travis-ci/passed'
+          uri: '/deployments/quay.io'
           baseUrl: "http://localhost:#{@serverPort}"
           headers:
             Authorization: 'token deploy-state-key'
-          json: true
+          json:
+            repository: 'the-owner/the-service'
+            docker_url: 'quay.io/the-owner/the-service:v1.0.0'
+            tag:        'v1.0.0'
 
-        request.put options, (error, @response, @body) =>
+        request.post options, (error, @response, @body) =>
           done error
 
       it 'should return a 404', ->
@@ -57,7 +60,7 @@ describe 'Update Build Passed', ->
             createdAt: moment('2001-01-01').toDate()
             build: {
               passing: false
-              docker: {
+              "travis-ci": {
                 passing: true
               }
             }
@@ -66,20 +69,20 @@ describe 'Update Build Passed', ->
 
         beforeEach (done) ->
           options =
-            uri: '/deployments/the-owner/the-service/v1.0.0/build/travis-ci/passed'
+            uri: '/deployments/quay.io'
             baseUrl: "http://localhost:#{@serverPort}"
             headers:
               Authorization: 'token deploy-state-key'
-            json: true
+            json:
+              repository: 'the-owner/the-service'
+              docker_url: 'quay.io/the-owner/the-service:v1.0.0'
+              tag:        'v1.0.0'
 
-          request.put options, (error, @response, @body) =>
+          request.post options, (error, @response, @body) =>
             done error
 
-        it 'should return a 204', ->
-          expect(@response.statusCode).to.equal 204
-
-        it 'should have an empty body', ->
-          expect(@body).to.be.empty
+        it 'should return a 201', ->
+          expect(@response.statusCode).to.equal 201
 
         describe 'when the database record is checked', ->
           beforeEach (done) ->
@@ -87,15 +90,18 @@ describe 'Update Build Passed', ->
             @db.deployments.findOne query, (error, @record) =>
               done error
 
-          it 'should have a passing build', ->
+          it 'should have the dockerUrl', ->
+            expect(@record.build.dockerUrl).to.equal 'quay.io/the-owner/the-service:v1.0.0'
+
+          it 'should be passing', ->
             expect(@record.build.passing).to.be.true
 
-          it 'should have a travis-ci set to passed', ->
-            expect(@record.build["travis-ci"].passing).to.be.true
+          it 'should have a docker set to passed', ->
+            expect(@record.build["docker"].passing).to.be.true
 
-          it 'should have a valid created at date for travis-ci', ->
-            expect(moment(@record.build["travis-ci"].createdAt).isBefore(moment())).to.be.true
-            expect(moment(@record.build["travis-ci"].createdAt).isAfter(moment().subtract(1, 'minute'))).to.be.true
+          it 'should have a valid created at date for docker', ->
+            expect(moment(@record.build["docker"].createdAt).isBefore(moment())).to.be.true
+            expect(moment(@record.build["docker"].createdAt).isAfter(moment().subtract(1, 'minute'))).to.be.true
 
       describe 'when the build exists', ->
         beforeEach (done) ->
@@ -106,9 +112,11 @@ describe 'Update Build Passed', ->
             createdAt: moment('2001-01-01').toDate()
             build: {
               passing: false,
+              "docker": {
+                passing: false
+              }
               "travis-ci": {
-                passing: false,
-                createdAt: moment('2001-01-01').toDate()
+                passing: true
               }
             }
             cluster: {}
@@ -116,20 +124,20 @@ describe 'Update Build Passed', ->
 
         beforeEach (done) ->
           options =
-            uri: '/deployments/the-owner/the-service/v1.0.0/build/travis-ci/passed'
+            uri: '/deployments/quay.io'
             baseUrl: "http://localhost:#{@serverPort}"
             headers:
               Authorization: 'token deploy-state-key'
-            json: true
+            json:
+              repository: 'the-owner/the-service'
+              docker_url: 'quay.io/the-owner/the-service:v1.0.0'
+              tag:        'v1.0.0'
 
-          request.put options, (error, @response, @body) =>
+          request.post options, (error, @response, @body) =>
             done error
 
-        it 'should return a 204', ->
-          expect(@response.statusCode).to.equal 204
-
-        it 'should have an empty body', ->
-          expect(@body).to.be.empty
+        it 'should return a 201', ->
+          expect(@response.statusCode).to.equal 201
 
         describe 'when the database record is checked', ->
           beforeEach (done) ->
@@ -137,16 +145,16 @@ describe 'Update Build Passed', ->
             @db.deployments.findOne query, (error, @record) =>
               done error
 
-          it 'should have a non-passing build', ->
-            expect(@record.build.passing).to.be.false
+          it 'should have the dockerUrl', ->
+            expect(@record.build.dockerUrl).to.equal 'quay.io/the-owner/the-service:v1.0.0'
 
-          it 'should have a travis-ci set to passed', ->
-            expect(@record.build["travis-ci"].passing).to.be.true
+          it 'should be passing', ->
+            expect(@record.build.passing).to.be.true
 
-          it 'should have a valid createdAt date for travis-ci', ->
-            expect(moment(@record.build["travis-ci"].createdAt).valueOf()).to.be.equal moment('2001-01-01').valueOf()
+          it 'should have a docker set to passed', ->
+            expect(@record.build["docker"].passing).to.be.true
 
-          it 'should have a valid updatedAt date for travis-ci', ->
-            expect(moment(@record.build["travis-ci"].updatedAt).isBefore(moment())).to.be.true
-            expect(moment(@record.build["travis-ci"].updatedAt).isAfter(moment().subtract(1, 'minute'))).to.be.true
+          it 'should have a valid created at date for docker', ->
+            expect(moment(@record.build["docker"].createdAt).isBefore(moment())).to.be.true
+            expect(moment(@record.build["docker"].createdAt).isAfter(moment().subtract(1, 'minute'))).to.be.true
 

@@ -65,7 +65,7 @@ describe 'Update And Trigger Webhook', ->
           owner: 'the-owner'
           createdAt: moment('2001-01-01').valueOf()
           build: {
-            passing: true,
+            passing: false,
             "travis-ci": {
               passing: true,
               updatedAt: moment('2002-02-02').valueOf()
@@ -123,6 +123,9 @@ describe 'Update And Trigger Webhook', ->
               passing: false,
               createdAt: moment('2001-01-01').toDate()
             }
+            docker: {
+              passing: true
+            }
           }
           cluster: {}
         @db.deployments.insert deployment, done
@@ -139,6 +142,9 @@ describe 'Update And Trigger Webhook', ->
               passing: true,
               updatedAt: moment('2002-02-02').valueOf()
               createdAt: moment('2001-01-01').valueOf()
+            }
+            "docker": {
+              passing: true
             }
           }
           cluster: {}

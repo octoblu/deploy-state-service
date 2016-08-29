@@ -24,6 +24,13 @@ class DeployStateController
         return response.sendError error if error?
         response.sendStatus code
 
+  updateFromQuay: (request, response) =>
+    { docker_url, repository, tag } = request.body
+    { date } = request.query
+    @deployStateService.updateFromQuay { docker_url, repository, tag, date }, (error, code) =>
+      return response.sendError error if error?
+      response.sendStatus code
+
   listDeployments: (request, response) =>
     { owner, repo } = request.params
     @deployStateService.listDeployments { owner, repo }, (error, deployments) =>
