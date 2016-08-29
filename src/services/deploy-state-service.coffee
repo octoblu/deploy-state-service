@@ -113,7 +113,7 @@ class DeployStateService
 
   _tryAndNotify: (command, deployment, { url, token }, callback) =>
     options = { times: 3, interval: 500 }
-    async.retry options, async.apply(@_notify, command, deployment, { url, token }), callback
+    async.retry options, async.apply(@_notify, command, deployment, { url, token }), => callback null
 
   _notify: (command, deployment, { url, token }, callback) =>
     method = 'PUT'

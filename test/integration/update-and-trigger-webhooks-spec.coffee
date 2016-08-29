@@ -109,6 +109,7 @@ describe 'Update And Trigger Webhook', ->
       beforeEach (done) ->
         @db.webhooks.insert [
           { url: "http://localhost:#{0xbabe}/trigger", token: 'trigger-secret' }
+          { url: "http://localhost:#{0xbabe}/trigger-success", token: 'trigger-secret' }
         ], done
 
       beforeEach (done) ->
@@ -162,6 +163,11 @@ describe 'Update And Trigger Webhook', ->
         @trigger3 = @webhookClient.put('/trigger')
           .set 'Authorization', 'token trigger-secret'
           .send deployment
+          .reply(404)
+
+        @triggerSuccess = @webhookClient.put('/trigger-success')
+          .set 'Authorization', 'token trigger-secret'
+          .send deployment
           .reply(204)
 
         options =
@@ -176,9 +182,10 @@ describe 'Update And Trigger Webhook', ->
         request.put options, (error, @response, @body) =>
           done error
 
-      it 'should return a 204 and hit up the webhook 3 times', ->
+      it 'should return a 204 and hit up the webhook 3 times and the success webhook', ->
         expect(@response.statusCode).to.equal 204
         @trigger1.done()
         @trigger2.done()
         @trigger3.done()
+        @triggerSuccess.done()
 
