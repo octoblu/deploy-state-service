@@ -1,6 +1,6 @@
 {
   "name": "deploy-state-service",
-  "version": "6.0.1",
+  "version": "6.0.2",
   "description": "Micro-service for deploying micro-services",
   "keywords": [
     "Octoblu",
@@ -37,7 +37,6 @@
     "lodash": "^4.15.0",
     "moment": "^2.14.1",
     "mongojs": "^2.4.0",
-    "octoblu-raven": "^4.0.2",
     "request": "^2.74.0",
     "server-destroy": "^1.0.1"
   },

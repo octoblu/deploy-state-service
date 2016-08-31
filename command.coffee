@@ -1,22 +1,16 @@
 _             = require 'lodash'
 mongojs       = require 'mongojs'
-OctobluRaven  = require 'octoblu-raven'
 Server        = require './src/server'
 
 class Command
   constructor: ->
-    @octobluRaven  = new OctobluRaven()
     @mongoDbUri    = process.env.MONGODB_URI
     @serverOptions = {
       port:           process.env.PORT || 80
       disableLogging: process.env.DISABLE_LOGGING == "true"
       username: process.env.DEPLOY_STATE_USERNAME
       password: process.env.DEPLOY_STATE_PASSWORD
-      @octobluRaven,
     }
-
-  handleErrors: =>
-    @octobluRaven.patchGlobal()
 
   panic: (error) =>
     console.error error.stack
@@ -46,5 +40,4 @@ class Command
         process.exit 0
 
 command = new Command()
-command.handleErrors()
 command.run()
