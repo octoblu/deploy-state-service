@@ -48,7 +48,8 @@ npm install
 
 ```
 MONGODB_URI='mongodb://localhost:27017/some-deploy-state-database'
-DEPLOY_STATE_KEY='the-secret-authentication-key'
+DEPLOY_STATE_USERNAME='the-username'
+DEPLOY_STATE_PASSWORD='the-secret'
 ```
 
 ## Default
@@ -79,17 +80,11 @@ docker pull quay.io/octoblu/deploy-state-service
 docker run --rm -p 8888:80 quay.io/octoblu/deploy-state-service
 ```
 
-# Clients
-
-A client should register a webhook with the deploy state service.
-
-We've created an [Etcd Deploy Service](https://github.com/octoblu/etcd-deploy-service) for our current deployment stack.
-
 # API
 
 ## Authentication
 
-Header `Authorization: token the-secret-key`
+Use basic auth with a the service's deploy-state username and password.
 
 ## List Deployments
 
@@ -104,9 +99,9 @@ deployments: [
     owner: "octoblu"
     tag  : "v1.0.0"
     createdAt: 100000000
-    dockerUrl: 'quay.io/octoblu/weather-service:v1.0.0'
     build: {
       passing: true,
+      dockerUrl: "quay.io/octoblu/weather-service:v1.0.0"
       "travis-ci": {
         passing: true
         createdAt: 10000000
@@ -174,14 +169,19 @@ Register a webhook to be triggered everytime a deployment is updated, or created
 ```json
 {
   "url": "https://my.deployment.client.octoblu.com/deployment/changed",
-  "authorization": "token the-secret-token"
+  "events": ["create", "update"],
+  "auth": {
+    "username": "some-username",
+    "password": "some-password"
+  }
 }
 ```
 
-When a deployment is created, the deploy-state-service will hit the webhook, up to 3 times, until it gets 201 back. The request method is a POST and the Authorization header is set to the authorization value on the registered webhook.
+When a deployment is created and updated the deploy-state-service will hit the webhook, up to 3 times, until it gets 200 level status code back. 
 
-When a deployment is updated, the deploy-state-service will hit the webhook, up to 3 times, until it gets 204 back. The request method is a PUT, and the Authorization header is set to the authorization value on the registered webhook.
+The webhook's auth username and password will be sent along with the request.
 
+For create the request method is a POST and for update it is PUT.
 
 ## Delete Webhook 
 

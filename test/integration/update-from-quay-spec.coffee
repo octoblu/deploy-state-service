@@ -15,7 +15,8 @@ describe 'Update From Quay', ->
       port: undefined,
       disableLogging: true
       logFn: @logFn
-      deployStateKey: 'deploy-state-key'
+      username: 'username'
+      password: 'password'
 
     serverOptions.database = @db.database
 
@@ -34,8 +35,9 @@ describe 'Update From Quay', ->
         options =
           uri: '/deployments/quay.io'
           baseUrl: "http://localhost:#{@serverPort}"
-          headers:
-            Authorization: 'token deploy-state-key'
+          auth:
+            username: 'username'
+            password: 'password'
           json:
             repository: 'the-owner/the-service'
             docker_url: 'quay.io/the-owner/the-service:v1.0.0'
@@ -71,8 +73,9 @@ describe 'Update From Quay', ->
           options =
             uri: '/deployments/quay.io'
             baseUrl: "http://localhost:#{@serverPort}"
-            headers:
-              Authorization: 'token deploy-state-key'
+            auth:
+              username: 'username'
+              password: 'password'
             json:
               repository: 'the-owner/the-service'
               docker_url: 'quay.io/the-owner/the-service:v1.0.0'
@@ -126,8 +129,9 @@ describe 'Update From Quay', ->
           options =
             uri: '/deployments/quay.io'
             baseUrl: "http://localhost:#{@serverPort}"
-            headers:
-              Authorization: 'token deploy-state-key'
+            auth:
+              username: 'username'
+              password: 'password'
             json:
               repository: 'the-owner/the-service'
               docker_url: 'quay.io/the-owner/the-service:v1.0.0'

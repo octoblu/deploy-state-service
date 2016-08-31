@@ -16,7 +16,8 @@ describe 'Create Deployment', ->
       port: undefined,
       disableLogging: true
       logFn: @logFn
-      deployStateKey: 'deploy-state-key'
+      username: 'username'
+      password: 'password'
 
     serverOptions.database = @db.database
 
@@ -35,8 +36,9 @@ describe 'Create Deployment', ->
         options =
           uri: '/deployments/the-owner/the-service/v1.0.0'
           baseUrl: "http://localhost:#{@serverPort}"
-          headers:
-            Authorization: 'token deploy-state-key'
+          auth:
+            username: 'username'
+            password: 'password'
           json: true
 
         request.post options, (error, @response, @body) =>
@@ -69,8 +71,9 @@ describe 'Create Deployment', ->
           options =
             uri: '/deployments/the-owner/the-service/v1.0.0'
             baseUrl: "http://localhost:#{@serverPort}"
-            headers:
-              Authorization: 'token deploy-state-key'
+            auth:
+              username: 'username'
+              password: 'password'
             json: true
 
           request.post options, (error, @response, @body) =>

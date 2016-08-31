@@ -20,7 +20,8 @@ describe 'Update And Trigger Webhook', ->
       port: undefined,
       disableLogging: true
       logFn: @logFn
-      deployStateKey: 'deploy-state-key'
+      username: 'username'
+      password: 'password'
 
     serverOptions.database = @db.database
 
@@ -37,9 +38,11 @@ describe 'Update And Trigger Webhook', ->
   describe 'on PUT /deployments/:owner/:repo/:tag/build/:state/passed', ->
     describe 'when the deployment exists', ->
       beforeEach (done) ->
+        auth = { username: 'uuid', password: 'token' }
         @db.webhooks.insert [
-          { url: "http://localhost:#{0xbabe}/trigger1", authorization: 'token trigger-1-secret' }
-          { url: "http://localhost:#{0xbabe}/trigger2", authorization: 'token trigger-2-secret' }
+          { url: "http://localhost:#{0xbabe}/trigger", events: ['create'], auth }
+          { url: "http://localhost:#{0xbabe}/trigger1", auth }
+          { url: "http://localhost:#{0xbabe}/trigger2", auth }
         ], done
 
       beforeEach (done) ->
@@ -74,21 +77,27 @@ describe 'Update And Trigger Webhook', ->
           }
           cluster: {}
 
+        @trigger = @webhookClient.put('/trigger')
+          .set 'Authorization', 'Basic ' + new Buffer('uuid:token').toString('base64')
+          .send deployment
+          .reply(204)
+
         @trigger1 = @webhookClient.put('/trigger1')
-          .set 'Authorization', 'token trigger-1-secret'
+          .set 'Authorization', 'Basic ' + new Buffer('uuid:token').toString('base64')
           .send deployment
           .reply(204)
 
         @trigger2 = @webhookClient.put('/trigger2')
-          .set 'Authorization', 'token trigger-2-secret'
+          .set 'Authorization', 'Basic ' + new Buffer('uuid:token').toString('base64')
           .send deployment
           .reply(204)
 
         options =
           uri: '/deployments/the-owner/the-service/v1.0.0/build/travis-ci/passed'
           baseUrl: "http://localhost:#{@serverPort}"
-          headers:
-            Authorization: 'token deploy-state-key'
+          auth:
+            username: 'username'
+            password: 'password'
           json: true
           qs:
             date: moment('2002-02-02').valueOf()
@@ -105,11 +114,14 @@ describe 'Update And Trigger Webhook', ->
       it 'should trigger the second webhook', ->
         @trigger2.done()
 
-    describe 'when the webhook returns a non-204', ->
+      it 'should not trigger the create only webhook', ->
+        expect(@trigger.isDone).to.be.false
+
+    describe 'when the webhook returns a non-2xx', ->
       beforeEach (done) ->
         @db.webhooks.insert [
-          { url: "http://localhost:#{0xbabe}/trigger", authorization: 'token trigger-secret' }
-          { url: "http://localhost:#{0xbabe}/trigger-success", authorization: 'token trigger-secret' }
+          { url: "http://localhost:#{0xbabe}/trigger", auth: { username: 'uuid', password: 'token' } }
+          { url: "http://localhost:#{0xbabe}/trigger-success", auth: { username: 'uuid', password: 'token' } }
         ], done
 
       beforeEach (done) ->
@@ -151,30 +163,31 @@ describe 'Update And Trigger Webhook', ->
           cluster: {}
 
         @trigger1 = @webhookClient.put('/trigger')
-          .set 'Authorization', 'token trigger-secret'
+          .set 'Authorization', 'Basic ' + new Buffer('uuid:token').toString('base64')
           .send deployment
           .reply(503)
 
         @trigger2 = @webhookClient.put('/trigger')
-          .set 'Authorization', 'token trigger-secret'
+          .set 'Authorization', 'Basic ' + new Buffer('uuid:token').toString('base64')
           .send deployment
           .reply(422)
 
         @trigger3 = @webhookClient.put('/trigger')
-          .set 'Authorization', 'token trigger-secret'
+          .set 'Authorization', 'Basic ' + new Buffer('uuid:token').toString('base64')
           .send deployment
           .reply(404)
 
         @triggerSuccess = @webhookClient.put('/trigger-success')
-          .set 'Authorization', 'token trigger-secret'
+          .set 'Authorization', 'Basic ' + new Buffer('uuid:token').toString('base64')
           .send deployment
           .reply(204)
 
         options =
           uri: '/deployments/the-owner/the-service/v1.0.0/build/travis-ci/passed'
           baseUrl: "http://localhost:#{@serverPort}"
-          headers:
-            Authorization: 'token deploy-state-key'
+          auth:
+            username: 'username'
+            password: 'password'
           json: true
           qs:
             date: moment('2002-02-02').valueOf()

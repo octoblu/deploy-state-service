@@ -20,7 +20,8 @@ describe 'Create Deployment and Trigger Webhooks', ->
       port: undefined,
       disableLogging: true
       logFn: @logFn
-      deployStateKey: 'deploy-state-key'
+      username: 'username'
+      password: 'password'
 
     serverOptions.database = @db.database
 
@@ -37,8 +38,8 @@ describe 'Create Deployment and Trigger Webhooks', ->
   describe 'on POST /deployments/:owner/:repo/:tag', ->
     beforeEach (done) ->
       @db.webhooks.insert [
-        { url: "http://localhost:#{0xbabe}/trigger1", authorization: 'token trigger-1-secret' }
-        { url: "http://localhost:#{0xbabe}/trigger2", authorization: 'token trigger-2-secret' }
+        { url: "http://localhost:#{0xbabe}/trigger1", auth: { username: 'uuid', password: 'token' } }
+        { url: "http://localhost:#{0xbabe}/trigger2", auth: { username: 'uuid', password: 'token' } }
       ], done
 
     describe 'when does not exist', ->
@@ -52,20 +53,21 @@ describe 'Create Deployment and Trigger Webhooks', ->
           cluster: {}
 
         @trigger1 = @webhookClient.post('/trigger1')
-          .set 'Authorization', 'token trigger-1-secret'
+          .set 'Authorization', 'Basic ' + new Buffer('uuid:token').toString('base64')
           .send deployment
           .reply(201)
 
         @trigger2 = @webhookClient.post('/trigger2')
-          .set 'Authorization', 'token trigger-2-secret'
+          .set 'Authorization', 'Basic ' + new Buffer('uuid:token').toString('base64')
           .send deployment
           .reply(201)
 
         options =
           uri: '/deployments/the-owner/the-service/v1.0.0'
           baseUrl: "http://localhost:#{@serverPort}"
-          headers:
-            Authorization: 'token deploy-state-key'
+          auth:
+            username: 'username'
+            password: 'password'
           json: true
           qs:
             date: moment('2002-02-02').valueOf()
@@ -105,8 +107,9 @@ describe 'Create Deployment and Trigger Webhooks', ->
           options =
             uri: '/deployments/the-owner/the-service/v1.0.0'
             baseUrl: "http://localhost:#{@serverPort}"
-            headers:
-              Authorization: 'token deploy-state-key'
+            auth:
+              username: 'username'
+              password: 'password'
             json: true
 
           request.post options, (error, @response, @body) =>

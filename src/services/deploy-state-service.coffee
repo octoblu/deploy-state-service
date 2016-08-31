@@ -80,11 +80,11 @@ class DeployStateService
   listDeployments: ({ owner, repo }, callback) =>
     @_findDeployments { owner, repo }, callback
 
-  registerWebhook: ({ url, authorization }, callback) =>
+  registerWebhook: ({ url, auth, events }, callback) =>
     @webhooks.findOne { url }, (error, webhook) =>
       return callback error if error?
       return callback null, 204 if webhook?
-      @webhooks.insert { url, authorization }, (error) =>
+      @webhooks.insert { url, auth, events }, (error) =>
         return callback error if error?
         callback null, 201
 
@@ -111,26 +111,25 @@ class DeployStateService
         return callback error if error?
         async.each webhooks, async.apply(@_tryAndNotify, command, deployment), callback
 
-  _tryAndNotify: (command, deployment, { url, authorization }, callback) =>
+  _tryAndNotify: (command, deployment, { url, auth, events }, callback) =>
     options = { times: 3, interval: 500 }
-    async.retry options, async.apply(@_notify, command, deployment, { url, authorization }), => callback null
+    async.retry options, async.apply(@_notify, command, deployment, { url, auth, events }), => callback null
 
-  _notify: (command, deployment, { url, authorization }, callback) =>
+  _notify: (command, deployment, { url, auth, events }, callback) =>
+    events = ['create', 'update'] if _.isEmpty events
+    return callback null unless command in events
     method = 'PUT'
     method = 'POST' if command == 'create'
-    statusCode = 204
-    statusCode = 201 if command == 'create'
     options = {
       url,
       method,
-      headers:
-        Authorization: authorization
+      auth,
       json: deployment
     }
     request options, (error, response, body) =>
       return callback error if error?
       return callback new Error 'Fatal error from webhook' if response.statusCode >= 500
-      return callback new Error "Non-#{statusCode} statusCode from webhook" unless response.statusCode == statusCode
+      return callback new Error "Non-200 level statusCode from webhook" if response.statusCode >= 300
       callback null
 
   _getDate: (date) =>

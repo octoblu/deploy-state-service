@@ -1,27 +1,19 @@
-cors               = require 'cors'
-morgan             = require 'morgan'
-express            = require 'express'
-bodyParser         = require 'body-parser'
-compression        = require 'compression'
-OctobluRaven       = require 'octoblu-raven'
+octobluExpress     = require 'express-octoblu'
 enableDestroy      = require 'server-destroy'
-sendError          = require 'express-send-error'
-errorhandler       = require 'errorhandler'
-expressVersion     = require 'express-package-version'
-meshbluHealthcheck = require 'express-meshblu-healthcheck'
+basicauth          = require 'basicauth-middleware'
 debug              = require('debug')('deploy-state-service:server')
 
 Router             = require './router'
-authorize          = require './middlewares/authorize'
 DeployStateService = require './services/deploy-state-service'
 
 class Server
   constructor: (options) ->
-    { @logFn, @disableLogging, @port } = options
-    { @database, @deployStateKey, @octobluRaven } = options
+    { @disableLogging, @port } = options
+    { @database, @octobluRaven } = options
+    { @username, @password } = options
     throw new Error 'Missing database' unless @database?
-    throw new Error 'Missing deployStateKey' unless @deployStateKey?
-    @octobluRaven ?= new OctobluRaven()
+    throw new Error 'Missing username' unless @username?
+    throw new Error 'Missing password' unless @password?
 
   address: =>
     @server.address()
@@ -31,22 +23,9 @@ class Server
     return response.statusCode < 400
 
   run: (callback) =>
-    app = express()
+    app = octobluExpress({ @octobluRaven, @disableLogging })
 
-    app.use expressVersion { format: '{"version": "%s"}' }
-    app.use meshbluHealthcheck()
-
-    ravenExpress = @octobluRaven.express()
-    app.use ravenExpress.handleErrors()
-    app.use sendError({ @logFn })
-    app.use errorhandler()
-    app.use cors()
-    app.use bodyParser.urlencoded { limit: '1mb', extended : true }
-    app.use bodyParser.json { limit : '1mb' }
-
-    app.use authorize.auth({ @deployStateKey })
-
-    app.options '*', cors()
+    app.use basicauth @username, @password
 
     deployStateService = new DeployStateService { @database }
     router = new Router { deployStateService }

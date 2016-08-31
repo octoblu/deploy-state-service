@@ -10,7 +10,8 @@ class Command
     @serverOptions = {
       port:           process.env.PORT || 80
       disableLogging: process.env.DISABLE_LOGGING == "true"
-      deployStateKey: process.env.DEPLOY_STATE_KEY
+      username: process.env.DEPLOY_STATE_USERNAME
+      password: process.env.DEPLOY_STATE_PASSWORD
       @octobluRaven,
     }
 
@@ -23,7 +24,8 @@ class Command
 
   run: =>
     @panic new Error('Missing required environment variable: MONGODB_URI') unless @mongoDbUri?
-    @panic new Error('Missing required environment variable: DEPLOY_STATE_KEY') unless @serverOptions.deployStateKey?
+    @panic new Error('Missing required environment variable: DEPLOY_STATE_USERNAME') unless @serverOptions.username?
+    @panic new Error('Missing required environment variable: DEPLOY_STATE_PASSWORD') unless @serverOptions.password?
     @panic new Error('Missing port') unless @serverOptions.port?
 
     database = mongojs @mongoDbUri, ['deployments', 'webhooks']

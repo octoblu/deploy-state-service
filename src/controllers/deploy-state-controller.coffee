@@ -38,11 +38,9 @@ class DeployStateController
       response.status(200).send { deployments }
 
   registerWebhook: (request, response) =>
-    { url, authorization, token } = request.body
-    authorization ?= "token #{token}" if token?
+    { url, auth, events } = request.body
     return response.sendStatus(422) unless url?
-    return response.sendStatus(422) unless authorization?
-    @deployStateService.registerWebhook { url, authorization }, (error, code) =>
+    @deployStateService.registerWebhook { url, auth, events }, (error, code) =>
       return response.sendError error if error?
       response.sendStatus code
 

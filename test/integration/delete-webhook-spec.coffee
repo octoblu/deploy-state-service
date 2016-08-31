@@ -13,7 +13,8 @@ describe 'Delete Webhook', ->
       port: undefined,
       disableLogging: true
       logFn: @logFn
-      deployStateKey: 'deploy-state-key'
+      username: 'username'
+      password: 'password'
 
     serverOptions.database = @db.database
 
@@ -32,8 +33,9 @@ describe 'Delete Webhook', ->
         options =
           uri: '/webhooks'
           baseUrl: "http://localhost:#{@serverPort}"
-          headers:
-            Authorization: 'token deploy-state-key'
+          auth:
+            username: 'username'
+            password: 'password'
           json:
             url: 'https://some.testing.dev/webhook'
 
@@ -53,8 +55,9 @@ describe 'Delete Webhook', ->
         options =
           uri: '/webhooks'
           baseUrl: "http://localhost:#{@serverPort}"
-          headers:
-            Authorization: 'token deploy-state-key'
+          auth:
+            username: 'username'
+            password: 'password'
           json:
             url: 'https://some.testing.dev/webhook'
 
@@ -77,8 +80,9 @@ describe 'Delete Webhook', ->
         options =
           uri: '/webhooks'
           baseUrl: "http://localhost:#{@serverPort}"
-          headers:
-            Authorization: 'token deploy-state-key'
+          auth:
+            username: 'username'
+            password: 'password'
           json: true
 
         request.del options, (error, @response, @body) =>

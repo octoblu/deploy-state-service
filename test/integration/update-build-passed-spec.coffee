@@ -15,7 +15,8 @@ describe 'Update Build Passed', ->
       port: undefined,
       disableLogging: true
       logFn: @logFn
-      deployStateKey: 'deploy-state-key'
+      username: 'username'
+      password: 'password'
 
     serverOptions.database = @db.database
 
@@ -34,8 +35,9 @@ describe 'Update Build Passed', ->
         options =
           uri: '/deployments/the-owner/the-service/v1.0.0/build/travis-ci/passed'
           baseUrl: "http://localhost:#{@serverPort}"
-          headers:
-            Authorization: 'token deploy-state-key'
+          auth:
+            username: 'username'
+            password: 'password'
           json: true
 
         request.put options, (error, @response, @body) =>
@@ -68,8 +70,9 @@ describe 'Update Build Passed', ->
           options =
             uri: '/deployments/the-owner/the-service/v1.0.0/build/travis-ci/passed'
             baseUrl: "http://localhost:#{@serverPort}"
-            headers:
-              Authorization: 'token deploy-state-key'
+            auth:
+              username: 'username'
+              password: 'password'
             json: true
 
           request.put options, (error, @response, @body) =>
@@ -118,8 +121,9 @@ describe 'Update Build Passed', ->
           options =
             uri: '/deployments/the-owner/the-service/v1.0.0/build/travis-ci/passed'
             baseUrl: "http://localhost:#{@serverPort}"
-            headers:
-              Authorization: 'token deploy-state-key'
+            auth:
+              username: 'username'
+              password: 'password'
             json: true
 
           request.put options, (error, @response, @body) =>

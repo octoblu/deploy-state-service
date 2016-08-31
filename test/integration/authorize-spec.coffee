@@ -13,7 +13,8 @@ describe 'Authorize', ->
       port: undefined,
       disableLogging: true
       logFn: @logFn
-      deployStateKey: 'deploy-state-key'
+      username: 'username'
+      password: 'password'
 
     serverOptions.database = @db.database
 
@@ -32,8 +33,9 @@ describe 'Authorize', ->
         options =
           uri: '/authorize'
           baseUrl: "http://localhost:#{@serverPort}"
-          headers:
-            Authorization: 'token deploy-state-key'
+          auth:
+            username: 'username'
+            password: 'password'
           json: true
 
         request.get options, (error, @response, @body) =>
@@ -55,13 +57,14 @@ describe 'Authorize', ->
       it 'should return a 401', ->
         expect(@response.statusCode).to.equal 401
 
-    describe 'when the authorization type is wrong', ->
+    describe 'when the authorization key is wrong', ->
       beforeEach (done) ->
         options =
           uri: '/authorize'
           baseUrl: "http://localhost:#{@serverPort}"
-          headers:
-            Authorization: 'wrong deploy-state-key'
+          auth:
+            username: 'wrong'
+            password: 'wrong'
           json: true
 
         request.get options, (error, @response, @body) =>
@@ -69,19 +72,4 @@ describe 'Authorize', ->
 
       it 'should return a 401', ->
         expect(@response.statusCode).to.equal 401
-
-    describe 'when the authorization key is wrong', ->
-      beforeEach (done) ->
-        options =
-          uri: '/authorize'
-          baseUrl: "http://localhost:#{@serverPort}"
-          headers:
-            Authorization: 'token not-the-deploy-state-key'
-          json: true
-
-        request.get options, (error, @response, @body) =>
-          done error
-
-      it 'should return a 403', ->
-        expect(@response.statusCode).to.equal 403
 

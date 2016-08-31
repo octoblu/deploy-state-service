@@ -15,7 +15,8 @@ describe 'List Deployments', ->
       port: undefined,
       disableLogging: true
       logFn: @logFn
-      deployStateKey: 'deploy-state-key'
+      username: 'username'
+      password: 'password'
 
     serverOptions.database = @db.database
 
@@ -75,8 +76,9 @@ describe 'List Deployments', ->
         options =
           uri: '/deployments/the-owner/the-service'
           baseUrl: "http://localhost:#{@serverPort}"
-          headers:
-            Authorization: 'token deploy-state-key'
+          auth:
+            username: 'username'
+            password: 'password'
           json: true
 
         request.get options, (error, @response, @body) =>
@@ -130,8 +132,9 @@ describe 'List Deployments', ->
         options =
           uri: '/deployments/the-owner/the-service'
           baseUrl: "http://localhost:#{@serverPort}"
-          headers:
-            Authorization: 'token deploy-state-key'
+          auth:
+            username: 'username'
+            password: 'password'
           json: true
 
         request.get options, (error, @response, @body) =>
