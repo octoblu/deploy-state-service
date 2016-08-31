@@ -20,7 +20,7 @@ class DeployStateService
   getDeployment: ({ owner, repo, tag }, callback) =>
     @_findDeployment { owner, repo, tag }, (error, deployment) =>
       return callback error if error?
-      return callback @_createError(404, 'Unable to find deployment') unless deployment?
+      return callback null, null, 404 unless deployment?
       callback null, deployment
 
   createDeployment: ({ owner, repo, tag, date }, callback) =>

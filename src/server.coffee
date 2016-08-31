@@ -1,16 +1,15 @@
-octobluExpress     = require 'express-octoblu'
-enableDestroy      = require 'server-destroy'
-basicauth          = require 'basicauth-middleware'
-debug              = require('debug')('deploy-state-service:server')
+octobluExpress = require 'express-octoblu'
+enableDestroy  = require 'server-destroy'
+basicauth      = require 'basicauth-middleware'
+debug          = require('debug')('deploy-state-service:server')
 
 Router             = require './router'
 DeployStateService = require './services/deploy-state-service'
 
 class Server
   constructor: (options) ->
-    { @disableLogging, @port } = options
-    { @database, @octobluRaven } = options
-    { @username, @password } = options
+    { @logFn, @disableLogging, @port } = options
+    { @database, @username, @password } = options
     throw new Error 'Missing database' unless @database?
     throw new Error 'Missing username' unless @username?
     throw new Error 'Missing password' unless @password?
@@ -23,7 +22,7 @@ class Server
     return response.statusCode < 400
 
   run: (callback) =>
-    app = octobluExpress({ @octobluRaven, @disableLogging })
+    app = octobluExpress({ @logFn, @octobluRaven, @disableLogging })
 
     app.use basicauth @username, @password
 

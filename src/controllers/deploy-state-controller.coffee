@@ -4,8 +4,9 @@ class DeployStateController
 
   getDeployment: (request, response) =>
     { owner, repo, tag } = request.params
-    @deployStateService.getDeployment { owner, repo, tag }, (error, deployment) =>
+    @deployStateService.getDeployment { owner, repo, tag }, (error, deployment, code) =>
       return response.sendError error if error?
+      return response.sendStatus code if code?
       response.status(200).send deployment
 
   createDeployment: (request, response) =>
