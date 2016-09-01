@@ -7,28 +7,26 @@ class Router
   route: (app) =>
     deployStateController = new DeployStateController {@deployStateService}
 
-    app.get    '/deployments/:owner/:repo', deployStateController.listDeployments
-    app.get    '/deployments/:owner/:repo/:tag', deployStateController.getDeployment
-    app.post   '/deployments/:owner/:repo/:tag', deployStateController.createDeployment
-    app.post   '/deployments/quay.io', deployStateController.updateFromQuay
-    app.put    '/deployments/:owner/:repo/:tag/build/:state/passed', deployStateController.update {
-      key: 'build',
-      passing: true
-    }
-    app.put    '/deployments/:owner/:repo/:tag/build/:state/failed', deployStateController.update {
-      key: 'build',
-      passing: false
-    }
-    app.put    '/deployments/:owner/:repo/:tag/cluster/:state/passed', deployStateController.update {
-      key: 'cluster',
-      passing: true
-    }
-    app.put    '/deployments/:owner/:repo/:tag/cluster/:state/failed', deployStateController.update {
-      key: 'cluster',
-      passing: false
-    }
-    app.post   '/webhooks', deployStateController.registerWebhook
-    app.delete '/webhooks', deployStateController.deleteWebhook
-    app.get    '/authorize', (request, response) => response.sendStatus(204)
+    app.route '/deployments/:owner/:repo'
+      .get deployStateController.listDeployments
+
+    app.route '/deployments/:owner/:repo/:tag'
+      .get deployStateController.getDeployment
+      .post deployStateController.createDeployment
+
+    app.put '/deployments/:owner/:repo/:tag/build/:state/passed', deployStateController.update 'build', true
+    app.put '/deployments/:owner/:repo/:tag/build/:state/failed', deployStateController.update 'build', false
+
+    app.put '/deployments/:owner/:repo/:tag/cluster/:state/passed', deployStateController.update 'cluster', true
+    app.put '/deployments/:owner/:repo/:tag/cluster/:state/failed', deployStateController.update 'cluster', false
+
+    app.route '/webhooks'
+      .post deployStateController.registerWebhook
+      .delete deployStateController.deleteWebhook
+
+    app.post '/deployments/quay.io', deployStateController.updateFromQuay
+    app.post '/deployments/travis-ci', deployStateController.updateFromTravis
+
+    app.get '/authorize', (request, response) => response.sendStatus(204)
 
 module.exports = Router

@@ -44,11 +44,10 @@ class DeployStateService
   update: ({ owner, repo, tag, key, passing, date }, callback) =>
     @_findDeployment { owner, repo, tag }, (error, deployment) =>
       return callback error if error?
-      return callback null, 404 unless deployment?
-
+      return callback null, 404 unless deployment
       query = {}
-      query["build.passing"]  = @_buildPassing deployment, "#{key}.passing", passing
-      query["#{key}.passing"] = passing
+      query["build.passing"]    = @_buildPassing deployment, "#{key}.passing", passing
+      query["#{key}.passing"]   = passing
       query["#{key}.createdAt"] = @_getDate(date) unless _.get deployment, "#{key}.createdAt"
       query["#{key}.updatedAt"] = @_getDate(date) if _.get deployment, "#{key}.createdAt"
 

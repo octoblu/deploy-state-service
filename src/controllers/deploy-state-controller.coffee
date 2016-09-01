@@ -16,7 +16,7 @@ class DeployStateController
       return response.sendError error if error?
       response.sendStatus code
 
-  update: ({ passing, key }) =>
+  update: (key, passing) =>
     return (request, response) =>
       { owner, repo, tag, state } = request.params
       { date } = request.query
@@ -29,6 +29,19 @@ class DeployStateController
     { docker_url, repository, tag } = request.body
     { date } = request.query
     @deployStateService.updateFromQuay { docker_url, repository, tag, date }, (error, code) =>
+      return response.sendError error if error?
+      response.sendStatus code
+
+  updateFromTravis: (request, response) =>
+    { repository, status, branch } = request.body?.payload
+    { date } = request.query
+    owner = repository.owner_name
+    repo  = repository.name
+    tag   = branch
+    key   = 'build.travis-ci'
+    passing = status == 1 || status == '1'
+    return response.sendStatus(422) unless /^v\d+/.test tag
+    @deployStateService.update { owner, repo, tag, key, passing, date }, (error, code) =>
       return response.sendError error if error?
       response.sendStatus code
 
