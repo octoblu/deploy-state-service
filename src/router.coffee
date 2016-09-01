@@ -1,24 +1,37 @@
+basicauth             = require 'basicauth-middleware'
+TravisAuth            = require './middlewares/travisauth-middleware'
 DeployStateController = require './controllers/deploy-state-controller'
 
 class Router
-  constructor: ({@deployStateService}) ->
+  constructor: ({ @deployStateService, @username, @password, @travisToken }) ->
     throw new Error 'Missing deployStateService' unless @deployStateService?
+    throw new Error 'Missing travisToken' unless @travisToken?
+    throw new Error 'Missing username' unless @username?
+    throw new Error 'Missing password' unless @password?
 
   route: (app) =>
+    travisAuth = new TravisAuth { @travisToken }
     deployStateController = new DeployStateController {@deployStateService}
 
-    app.route '/deployments/:owner/:repo'
+    app.use (request) =>
+      if request.path == '/deployments/travis-ci'
+        return travisAuth.auth() arguments...
+
+      return basicauth(@username, @password) arguments...
+
+    baseRoute = '/deployments/:owner/:repo'
+    app.route baseRoute
       .get deployStateController.listDeployments
 
-    app.route '/deployments/:owner/:repo/:tag'
+    app.route "#{baseRoute}/:tag"
       .get deployStateController.getDeployment
       .post deployStateController.createDeployment
 
-    app.put '/deployments/:owner/:repo/:tag/build/:state/passed', deployStateController.update 'build', true
-    app.put '/deployments/:owner/:repo/:tag/build/:state/failed', deployStateController.update 'build', false
+    app.put "#{baseRoute}/:tag/build/:state/passed", deployStateController.upsertDeployment 'build', true
+    app.put "#{baseRoute}/:tag/build/:state/failed", deployStateController.upsertDeployment 'build', false
 
-    app.put '/deployments/:owner/:repo/:tag/cluster/:state/passed', deployStateController.update 'cluster', true
-    app.put '/deployments/:owner/:repo/:tag/cluster/:state/failed', deployStateController.update 'cluster', false
+    app.put "#{baseRoute}/:tag/cluster/:state/passed", deployStateController.upsertDeployment 'cluster', true
+    app.put "#{baseRoute}/:tag/cluster/:state/failed", deployStateController.upsertDeployment 'cluster', false
 
     app.route '/webhooks'
       .post deployStateController.registerWebhook

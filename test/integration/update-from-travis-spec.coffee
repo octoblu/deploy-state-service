@@ -1,7 +1,8 @@
-request  = require 'request'
-moment   = require 'moment'
-Database = require '../database'
-Server   = require '../../src/server'
+request    = require 'request'
+moment     = require 'moment'
+Database   = require '../database'
+Server     = require '../../src/server'
+TravisAuth = require '../../src/middlewares/travisauth-middleware'
 
 describe 'Update From Travis', ->
   beforeEach (done) ->
@@ -17,6 +18,9 @@ describe 'Update From Travis', ->
       logFn: @logFn
       username: 'username'
       password: 'password'
+      travisToken: 'hello'
+
+    @travisAuth = new TravisAuth { travisToken: 'hello' }
 
     serverOptions.database = @db.database
 
@@ -30,14 +34,11 @@ describe 'Update From Travis', ->
     @server.destroy()
 
   describe 'on POST /deployments/travis-ci', ->
-    describe 'when the deployment does NOT exist', ->
+    describe 'when the auth is missing', ->
       beforeEach (done) ->
         options =
           uri: '/deployments/travis-ci'
           baseUrl: "http://localhost:#{@serverPort}"
-          auth:
-            username: 'username'
-            password: 'password'
           form:
             payload:
               status: 1
@@ -49,11 +50,93 @@ describe 'Update From Travis', ->
         request.post options, (error, @response, @body) =>
           done error
 
-      it 'should return a 404', ->
-        expect(@response.statusCode).to.equal 404
+      it 'should return a 401', ->
+        expect(@response.statusCode).to.equal 401
 
-      it 'should have a "Not Found"', ->
-        expect(@body).to.equal 'Not Found'
+    describe 'when the auth is invalid', ->
+      beforeEach (done) ->
+        options =
+          uri: '/deployments/travis-ci'
+          baseUrl: "http://localhost:#{@serverPort}"
+          headers:
+            'Travis-Repo-Slug': 'hi2'
+            'Authorization': @travisAuth.encrypt('hi')
+          form:
+            payload:
+              status: 1
+              branch: 'v1.0.0'
+              repository:
+                name: 'the-service'
+                owner_name: 'the-owner'
+
+        request.post options, (error, @response, @body) =>
+          done error
+
+      it 'should return a 401', ->
+        expect(@response.statusCode).to.equal 401
+
+    describe 'when the body is invalid', ->
+      beforeEach (done) ->
+        options =
+          uri: '/deployments/travis-ci'
+          baseUrl: "http://localhost:#{@serverPort}"
+          headers:
+            'Travis-Repo-Slug': 'hi'
+            'Authorization': @travisAuth.encrypt('hi')
+          form:
+            payload: {}
+
+        request.post options, (error, @response, @body) =>
+          done error
+
+      it 'should return a 400', ->
+        expect(@response.statusCode).to.equal 400
+
+    describe 'when the deployment does NOT exist', ->
+      beforeEach (done) ->
+        options =
+          uri: '/deployments/travis-ci'
+          baseUrl: "http://localhost:#{@serverPort}"
+          headers:
+            'Travis-Repo-Slug': 'hi'
+            'Authorization': @travisAuth.encrypt('hi')
+          form:
+            payload:
+              status: 1
+              branch: 'v1.0.0'
+              repository:
+                name: 'the-service'
+                owner_name: 'the-owner'
+
+        request.post options, (error, @response, @body) =>
+          done error
+
+      it 'should return a 204', ->
+        expect(@response.statusCode).to.equal 204
+
+      describe 'when the database record is checked', ->
+        beforeEach (done) ->
+          query = { owner: 'the-owner', repo: 'the-service', tag: 'v1.0.0' }
+          @db.deployments.findOne query, (error, @record) => done error
+
+        it 'should be have the repo', ->
+          expect(@record.repo).to.equal 'the-service'
+
+        it 'should be have the owner', ->
+          expect(@record.owner).to.equal 'the-owner'
+
+        it 'should be have the tag', ->
+          expect(@record.tag).to.equal 'v1.0.0'
+
+        it 'should be NOT be passing', ->
+          expect(@record.build.passing).to.be.false
+
+        it 'should have a travis-ci set to passed', ->
+          expect(@record.build["travis-ci"].passing).to.be.true
+
+        it 'should have a valid created at date for travis', ->
+          expect(moment(@record.build["travis-ci"].createdAt).isBefore(moment())).to.be.true
+          expect(moment(@record.build["travis-ci"].createdAt).isAfter(moment().subtract(1, 'minute'))).to.be.true
 
     describe 'when the deployment exists', ->
       describe 'when the build does NOT exist', ->
@@ -76,9 +159,9 @@ describe 'Update From Travis', ->
           options =
             uri: '/deployments/travis-ci'
             baseUrl: "http://localhost:#{@serverPort}"
-            auth:
-              username: 'username'
-              password: 'password'
+            headers:
+              'Travis-Repo-Slug': 'hi'
+              'Authorization': @travisAuth.encrypt('hi')
             form:
               payload:
                 status: 1
@@ -131,9 +214,9 @@ describe 'Update From Travis', ->
             options =
               uri: '/deployments/travis-ci'
               baseUrl: "http://localhost:#{@serverPort}"
-              auth:
-                username: 'username'
-                password: 'password'
+              headers:
+                'Travis-Repo-Slug': 'hi'
+                'Authorization': @travisAuth.encrypt('hi')
               form:
                 payload:
                   status: 1
@@ -169,9 +252,9 @@ describe 'Update From Travis', ->
             options =
               uri: '/deployments/travis-ci'
               baseUrl: "http://localhost:#{@serverPort}"
-              auth:
-                username: 'username'
-                password: 'password'
+              headers:
+                'Travis-Repo-Slug': 'hi'
+                'Authorization': @travisAuth.encrypt('hi')
               form:
                 payload:
                   status: 1
@@ -191,9 +274,9 @@ describe 'Update From Travis', ->
             options =
               uri: '/deployments/travis-ci'
               baseUrl: "http://localhost:#{@serverPort}"
-              auth:
-                username: 'username'
-                password: 'password'
+              headers:
+                'Travis-Repo-Slug': 'hi'
+                'Authorization': @travisAuth.encrypt('hi')
               form:
                 payload:
                   status: 0

@@ -17,6 +17,7 @@ describe 'Update From Quay', ->
       logFn: @logFn
       username: 'username'
       password: 'password'
+      travisToken: 'hello'
 
     serverOptions.database = @db.database
 
@@ -46,11 +47,8 @@ describe 'Update From Quay', ->
         request.post options, (error, @response, @body) =>
           done error
 
-      it 'should return a 404', ->
-        expect(@response.statusCode).to.equal 404
-
-      it 'should have a "Not Found"', ->
-        expect(@body).to.equal 'Not Found'
+      it 'should return a 201', ->
+        expect(@response.statusCode).to.equal 201
 
     describe 'when the deployment exists', ->
       describe 'when the build does NOT exist', ->

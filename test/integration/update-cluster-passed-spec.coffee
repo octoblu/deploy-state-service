@@ -17,6 +17,7 @@ describe 'Update Cluster Passed', ->
       logFn: @logFn
       username: 'username'
       password: 'password'
+      travisToken: 'hello'
 
     serverOptions.database = @db.database
 
@@ -43,11 +44,8 @@ describe 'Update Cluster Passed', ->
         request.put options, (error, @response, @body) =>
           done error
 
-      it 'should return a 404', ->
-        expect(@response.statusCode).to.equal 404
-
-      it 'should have a "Not Found"', ->
-        expect(@body).to.equal 'Not Found'
+      it 'should return a 204', ->
+        expect(@response.statusCode).to.equal 204
 
     describe 'when the deployment exists', ->
       describe 'when the cluster does NOT exist', ->

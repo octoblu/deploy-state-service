@@ -27,54 +27,20 @@ class DeployStateService
     @_findDeployment { owner, repo, tag }, (error, deployment) =>
       return callback error if error?
       return callback null, 204 if deployment?
-      record = {
-        owner,
-        repo,
-        tag,
-        build: { passing: false },
-        cluster: {},
-        createdAt: @_getDate(date)
-      }
-      @deployments.insert record, (error) =>
+      @_create { owner, repo, tag, date }, (error) =>
         return callback error if error?
         @_notifyAll 'create', { owner, repo, tag }, (error) =>
           return callback error if error?
           callback null, 201
 
-  update: ({ owner, repo, tag, key, passing, date }, callback) =>
-    @_findDeployment { owner, repo, tag }, (error, deployment) =>
+  upsertDeployment: ({ owner, repo, tag, key, passing, date, dockerUrl }, callback) =>
+    @_findOrCreate { owner, repo, tag }, (error, deployment) =>
       return callback error if error?
-      return callback null, 404 unless deployment
-      query = {}
-      query["build.passing"]    = @_buildPassing deployment, "#{key}.passing", passing
-      query["#{key}.passing"]   = passing
-      query["#{key}.createdAt"] = @_getDate(date) unless _.get deployment, "#{key}.createdAt"
-      query["#{key}.updatedAt"] = @_getDate(date) if _.get deployment, "#{key}.createdAt"
-
-      @deployments.update { owner, repo, tag }, { $set: query }, (error) =>
+      @_update deployment, { owner, repo, tag, key, passing, date, dockerUrl }, (error) =>
         return callback error if error?
         @_notifyAll 'update', { owner, repo, tag }, (error) =>
           return callback error if error?
           callback null, 204
-
-  updateFromQuay: ({ repository, docker_url, tag, date }, callback) =>
-    [ owner, repo ] = repository.split '/'
-    @_findDeployment { owner, repo, tag }, (error, deployment) =>
-      return callback error if error?
-      return callback null, 404 unless deployment?
-
-      query = {}
-      query["build.passing"]  = @_buildPassing deployment, "build.docker.passing", true
-      query["build.dockerUrl"] = docker_url
-      query["build.docker.passing"] = true
-      query["build.docker.createdAt"] = @_getDate(date) unless _.get deployment, "build.docker.createdAt"
-      query["build.docker.updatedAt"] = @_getDate(date) if _.get deployment, "build.docker.createdAt"
-
-      @deployments.update { owner, repo, tag }, { $set: query }, (error) =>
-        return callback error if error?
-        @_notifyAll 'update', { owner, repo, tag }, (error) =>
-          return callback error if error?
-          callback null, 201
 
   listDeployments: ({ owner, repo }, callback) =>
     @_findDeployments { owner, repo }, callback
@@ -94,6 +60,35 @@ class DeployStateService
       @webhooks.remove { url }, (error) =>
         return callback error if error?
         callback null, 204
+
+  _create: ({ owner, repo, tag, date }, callback) =>
+    record = {
+      owner,
+      repo,
+      tag,
+      build: { passing: false },
+      cluster: {},
+      createdAt: @_getDate(date)
+    }
+    @deployments.insert record, callback
+
+  _findOrCreate: ({ owner, repo, tag, key, passing, date }, callback) =>
+    @_findDeployment { owner, repo, tag }, (error, deployment) =>
+      return callback error if error?
+      return callback null, deployment if deployment
+      @_create { owner, repo, tag, date }, (error) =>
+        return callback error if error?
+        @_findDeployment { owner, repo, tag }, callback
+
+  _update: (deployment, { owner, repo, tag, key, passing, date, dockerUrl }, callback) =>
+    query = {}
+    query["build.passing"]    = @_buildPassing deployment, "#{key}.passing", passing
+    query["build.dockerUrl"]  = dockerUrl if dockerUrl?
+    query["#{key}.passing"]   = passing
+    query["#{key}.createdAt"] = @_getDate(date) unless _.get deployment, "#{key}.createdAt"
+    query["#{key}.updatedAt"] = @_getDate(date) if _.get deployment, "#{key}.createdAt"
+
+    @deployments.update { owner, repo, tag }, { $set: query }, callback
 
   _buildPassing: (deployment, key, value) =>
     deployment = _.cloneDeep deployment

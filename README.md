@@ -26,6 +26,8 @@
   * [Update Build Failed](#update-build-failed)
   * [Update Cluster Passed](#update-cluster-passed)
   * [Update Cluster Failed](#update-cluster-failed)
+  * [Update From Quay](#update-from-quay)
+  * [Update From Travis](#update-from-travis)
 * [License](#license)
 
 # Introduction
@@ -50,6 +52,7 @@ npm install
 MONGODB_URI='mongodb://localhost:27017/some-deploy-state-database'
 DEPLOY_STATE_USERNAME='the-username'
 DEPLOY_STATE_PASSWORD='the-secret'
+TRAVIS_TOKEN='travis-secret'
 ```
 
 ## Default
@@ -210,6 +213,21 @@ For create the request method is a POST and for update it is PUT.
 ## Update Cluster Failed 
 
 `PUT /deployments/:owner/:repo/:tag/cluster/:state/failed`
+
+## Update From Quay 
+
+`POST /deployments/quay.io`
+
+## Update From Travis 
+
+`POST /deployments/travis-ci`
+
+### Example travis.yml
+
+```yml
+notifications:
+  webhooks: https://deploy-state.octoblu.com/deployments/travis-ci
+```
 
 ## License
 

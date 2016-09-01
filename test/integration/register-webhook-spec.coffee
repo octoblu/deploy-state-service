@@ -15,6 +15,7 @@ describe 'Register Webhook', ->
       logFn: @logFn
       username: 'username'
       password: 'password'
+      travisToken: 'hello'
 
     serverOptions.database = @db.database
 

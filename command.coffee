@@ -6,10 +6,10 @@ class Command
   constructor: ->
     @mongoDbUri    = process.env.MONGODB_URI
     @serverOptions = {
-      port:           process.env.PORT || 80
-      disableLogging: process.env.DISABLE_LOGGING == "true"
-      username: process.env.DEPLOY_STATE_USERNAME
-      password: process.env.DEPLOY_STATE_PASSWORD
+      port        : process.env.PORT || 80
+      travisToken : process.env.TRAVIS_TOKEN
+      username    : process.env.DEPLOY_STATE_USERNAME
+      password    : process.env.DEPLOY_STATE_PASSWORD
     }
 
   panic: (error) =>
@@ -18,6 +18,7 @@ class Command
 
   run: =>
     @panic new Error('Missing required environment variable: MONGODB_URI') unless @mongoDbUri?
+    @panic new Error('Missing required environment variable: TRAVIS_TOKEN') unless @serverOptions.travisToken?
     @panic new Error('Missing required environment variable: DEPLOY_STATE_USERNAME') unless @serverOptions.username?
     @panic new Error('Missing required environment variable: DEPLOY_STATE_PASSWORD') unless @serverOptions.password?
     @panic new Error('Missing port') unless @serverOptions.port?

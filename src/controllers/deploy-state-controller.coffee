@@ -16,34 +16,47 @@ class DeployStateController
       return response.sendError error if error?
       response.sendStatus code
 
-  update: (key, passing) =>
+  upsertDeployment: (key, passing) =>
     return (request, response) =>
       { owner, repo, tag, state } = request.params
       { date } = request.query
       options = { owner, repo, tag, key: "#{key}.#{state}", passing, date }
-      @deployStateService.update options, (error, code) =>
+      @deployStateService.upsertDeployment options, (error) =>
         return response.sendError error if error?
-        response.sendStatus code
+        response.sendStatus 204
 
   updateFromQuay: (request, response) =>
     { docker_url, repository, tag } = request.body
     { date } = request.query
-    @deployStateService.updateFromQuay { docker_url, repository, tag, date }, (error, code) =>
+    [ owner, repo ] = repository.split '/'
+    options = {
+      dockerUrl: docker_url,
+      key: 'build.docker',
+      passing: true,
+      owner,
+      repo,
+      tag,
+      date
+    }
+    @deployStateService.upsertDeployment options, (error) =>
       return response.sendError error if error?
-      response.sendStatus code
+      response.sendStatus 201
 
   updateFromTravis: (request, response) =>
     { repository, status, branch } = request.body?.payload
+    return response.sendStatus(422) unless /^v\d+/.test branch
     { date } = request.query
-    owner = repository.owner_name
-    repo  = repository.name
-    tag   = branch
-    key   = 'build.travis-ci'
-    passing = status == 1 || status == '1'
-    return response.sendStatus(422) unless /^v\d+/.test tag
-    @deployStateService.update { owner, repo, tag, key, passing, date }, (error, code) =>
+    options = {
+      key: 'build.travis-ci',
+      passing: status == 1 || status == '1',
+      owner: repository.owner_name,
+      repo: repository.name,
+      tag: branch,
+      date
+    }
+    @deployStateService.upsertDeployment options, (error) =>
       return response.sendError error if error?
-      response.sendStatus code
+      response.sendStatus 204
 
   listDeployments: (request, response) =>
     { owner, repo } = request.params

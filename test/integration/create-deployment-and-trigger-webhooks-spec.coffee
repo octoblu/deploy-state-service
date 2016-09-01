@@ -22,6 +22,7 @@ describe 'Create Deployment and Trigger Webhooks', ->
       logFn: @logFn
       username: 'username'
       password: 'password'
+      travisToken: 'hello'
 
     serverOptions.database = @db.database
 
