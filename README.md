@@ -52,7 +52,8 @@ npm install
 MONGODB_URI='mongodb://localhost:27017/some-deploy-state-database'
 DEPLOY_STATE_USERNAME='the-username'
 DEPLOY_STATE_PASSWORD='the-secret'
-TRAVIS_TOKEN='travis-secret'
+TRAVIS_TOKEN_ORG='travis-secret-org'
+TRAVIS_TOKEN_PRO='travis-secret-pro'
 ```
 
 ## Default

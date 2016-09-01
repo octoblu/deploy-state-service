@@ -3,14 +3,15 @@ TravisAuth            = require './middlewares/travisauth-middleware'
 DeployStateController = require './controllers/deploy-state-controller'
 
 class Router
-  constructor: ({ @deployStateService, @username, @password, @travisToken }) ->
+  constructor: ({ @deployStateService, @username, @password, @travisTokenPro, @travisTokenOrg }) ->
     throw new Error 'Missing deployStateService' unless @deployStateService?
-    throw new Error 'Missing travisToken' unless @travisToken?
+    throw new Error 'Missing travisTokenPro' unless @travisTokenPro?
+    throw new Error 'Missing travisTokenOrg' unless @travisTokenOrg?
     throw new Error 'Missing username' unless @username?
     throw new Error 'Missing password' unless @password?
 
   route: (app) =>
-    travisAuth = new TravisAuth { @travisToken }
+    travisAuth = new TravisAuth { @travisTokenPro, @travisTokenOrg }
     deployStateController = new DeployStateController {@deployStateService}
 
     app.use (request) =>

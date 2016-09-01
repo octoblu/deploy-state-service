@@ -18,7 +18,8 @@ describe 'Get Deployment', ->
       logFn: @logFn
       username: 'username'
       password: 'password'
-      travisToken: 'hello'
+      travisTokenPro: 'hello-pro'
+      travisTokenOrg: 'hello-org'
 
     serverOptions.database = @db.database
 

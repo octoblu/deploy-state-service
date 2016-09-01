@@ -18,9 +18,10 @@ describe 'Update From Travis', ->
       logFn: @logFn
       username: 'username'
       password: 'password'
-      travisToken: 'hello'
+      travisTokenPro: 'hello-pro'
+      travisTokenOrg: 'hello-org'
 
-    @travisAuth = new TravisAuth { travisToken: 'hello' }
+    @travisAuth = new TravisAuth { travisTokenPro: 'hello-pro', travisTokenOrg: 'hello-org' }
 
     serverOptions.database = @db.database
 
@@ -60,7 +61,7 @@ describe 'Update From Travis', ->
           baseUrl: "http://localhost:#{@serverPort}"
           headers:
             'Travis-Repo-Slug': 'hi2'
-            'Authorization': @travisAuth.encrypt('hi')
+            'Authorization': @travisAuth.encryptOrg('hi')
           form:
             payload:
               status: 1
@@ -82,7 +83,7 @@ describe 'Update From Travis', ->
           baseUrl: "http://localhost:#{@serverPort}"
           headers:
             'Travis-Repo-Slug': 'hi'
-            'Authorization': @travisAuth.encrypt('hi')
+            'Authorization': @travisAuth.encryptOrg('hi')
           form:
             payload: {}
 
@@ -92,6 +93,28 @@ describe 'Update From Travis', ->
       it 'should return a 400', ->
         expect(@response.statusCode).to.equal 400
 
+    describe 'when the auth uses the pro token', ->
+      beforeEach (done) ->
+        options =
+          uri: '/deployments/travis-ci'
+          baseUrl: "http://localhost:#{@serverPort}"
+          headers:
+            'Travis-Repo-Slug': 'hi'
+            'Authorization': @travisAuth.encryptPro('hi')
+          form:
+            payload:
+              status: 1
+              branch: 'v1.0.0'
+              repository:
+                name: 'the-service'
+                owner_name: 'the-owner'
+
+        request.post options, (error, @response, @body) =>
+          done error
+
+      it 'should return a 204', ->
+        expect(@response.statusCode).to.equal 204
+
     describe 'when the deployment does NOT exist', ->
       beforeEach (done) ->
         options =
@@ -99,7 +122,7 @@ describe 'Update From Travis', ->
           baseUrl: "http://localhost:#{@serverPort}"
           headers:
             'Travis-Repo-Slug': 'hi'
-            'Authorization': @travisAuth.encrypt('hi')
+            'Authorization': @travisAuth.encryptOrg('hi')
           form:
             payload:
               status: 1
@@ -161,7 +184,7 @@ describe 'Update From Travis', ->
             baseUrl: "http://localhost:#{@serverPort}"
             headers:
               'Travis-Repo-Slug': 'hi'
-              'Authorization': @travisAuth.encrypt('hi')
+              'Authorization': @travisAuth.encryptOrg('hi')
             form:
               payload:
                 status: 1
@@ -216,7 +239,7 @@ describe 'Update From Travis', ->
               baseUrl: "http://localhost:#{@serverPort}"
               headers:
                 'Travis-Repo-Slug': 'hi'
-                'Authorization': @travisAuth.encrypt('hi')
+                'Authorization': @travisAuth.encryptOrg('hi')
               form:
                 payload:
                   status: 1
@@ -254,7 +277,7 @@ describe 'Update From Travis', ->
               baseUrl: "http://localhost:#{@serverPort}"
               headers:
                 'Travis-Repo-Slug': 'hi'
-                'Authorization': @travisAuth.encrypt('hi')
+                'Authorization': @travisAuth.encryptOrg('hi')
               form:
                 payload:
                   status: 1
@@ -276,7 +299,7 @@ describe 'Update From Travis', ->
               baseUrl: "http://localhost:#{@serverPort}"
               headers:
                 'Travis-Repo-Slug': 'hi'
-                'Authorization': @travisAuth.encrypt('hi')
+                'Authorization': @travisAuth.encryptOrg('hi')
               form:
                 payload:
                   status: 0

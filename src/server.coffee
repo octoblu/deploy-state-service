@@ -9,11 +9,12 @@ class Server
   constructor: (options) ->
     { @logFn, @disableLogging, @port } = options
     { @database, @username, @password } = options
-    { @travisToken } = options
+    { @travisTokenPro, @travisTokenOrg } = options
     throw new Error 'Missing database' unless @database?
     throw new Error 'Missing username' unless @username?
     throw new Error 'Missing password' unless @password?
-    throw new Error 'Missing travisToken' unless @travisToken?
+    throw new Error 'Missing travisTokenPro' unless @travisTokenPro?
+    throw new Error 'Missing travisTokenOrg' unless @travisTokenOrg?
 
   address: =>
     @server.address()
@@ -26,7 +27,7 @@ class Server
     app = octobluExpress({ @logFn, @octobluRaven, @disableLogging })
 
     deployStateService = new DeployStateService { @database }
-    router = new Router { deployStateService, @username, @password, @travisToken }
+    router = new Router { deployStateService, @username, @password, @travisTokenOrg, @travisTokenPro }
 
     router.route app
 
