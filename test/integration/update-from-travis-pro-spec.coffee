@@ -2,9 +2,8 @@ request    = require 'request'
 moment     = require 'moment'
 Database   = require '../database'
 Server     = require '../../src/server'
-TravisAuth = require '../../src/middlewares/travisauth-middleware'
 
-describe 'Update From Travis', ->
+describe 'Update From Travis Pro', ->
   beforeEach (done) ->
     @db = new Database
     @db.drop done
@@ -14,14 +13,11 @@ describe 'Update From Travis', ->
 
     serverOptions =
       port: undefined,
-      disableLogging: true
       logFn: @logFn
+      disableLogging: true
+      disableTravisAuth: true
       username: 'username'
       password: 'password'
-      travisTokenPro: 'hello-pro'
-      travisTokenOrg: 'hello-org'
-
-    @travisAuth = new TravisAuth { travisTokenPro: 'hello-pro', travisTokenOrg: 'hello-org' }
 
     serverOptions.database = @db.database
 
@@ -34,95 +30,12 @@ describe 'Update From Travis', ->
   afterEach ->
     @server.destroy()
 
-  describe 'on POST /deployments/travis-ci', ->
-    describe 'when the auth is missing', ->
-      beforeEach (done) ->
-        options =
-          uri: '/deployments/travis-ci'
-          baseUrl: "http://localhost:#{@serverPort}"
-          form:
-            payload:
-              status: 1
-              branch: 'v1.0.0'
-              repository:
-                name: 'the-service'
-                owner_name: 'the-owner'
-
-        request.post options, (error, @response, @body) =>
-          done error
-
-      it 'should return a 401', ->
-        expect(@response.statusCode).to.equal 401
-
-    describe 'when the auth is invalid', ->
-      beforeEach (done) ->
-        options =
-          uri: '/deployments/travis-ci'
-          baseUrl: "http://localhost:#{@serverPort}"
-          headers:
-            'Travis-Repo-Slug': 'hi2'
-            'Authorization': @travisAuth.encryptOrg('hi')
-          form:
-            payload:
-              status: 1
-              branch: 'v1.0.0'
-              repository:
-                name: 'the-service'
-                owner_name: 'the-owner'
-
-        request.post options, (error, @response, @body) =>
-          done error
-
-      it 'should return a 401', ->
-        expect(@response.statusCode).to.equal 401
-
-    describe 'when the body is invalid', ->
-      beforeEach (done) ->
-        options =
-          uri: '/deployments/travis-ci'
-          baseUrl: "http://localhost:#{@serverPort}"
-          headers:
-            'Travis-Repo-Slug': 'hi'
-            'Authorization': @travisAuth.encryptOrg('hi')
-          form:
-            payload: {}
-
-        request.post options, (error, @response, @body) =>
-          done error
-
-      it 'should return a 400', ->
-        expect(@response.statusCode).to.equal 400
-
-    describe 'when the auth uses the pro token', ->
-      beforeEach (done) ->
-        options =
-          uri: '/deployments/travis-ci'
-          baseUrl: "http://localhost:#{@serverPort}"
-          headers:
-            'Travis-Repo-Slug': 'hi'
-            'Authorization': @travisAuth.encryptPro('hi')
-          form:
-            payload:
-              status: 1
-              branch: 'v1.0.0'
-              repository:
-                name: 'the-service'
-                owner_name: 'the-owner'
-
-        request.post options, (error, @response, @body) =>
-          done error
-
-      it 'should return a 204', ->
-        expect(@response.statusCode).to.equal 204
-
+  describe 'on POST /deployments/travis-ci/pro', ->
     describe 'when the deployment does NOT exist', ->
       beforeEach (done) ->
         options =
-          uri: '/deployments/travis-ci'
+          uri: '/deployments/travis-ci/pro'
           baseUrl: "http://localhost:#{@serverPort}"
-          headers:
-            'Travis-Repo-Slug': 'hi'
-            'Authorization': @travisAuth.encryptOrg('hi')
           form:
             payload:
               status: 1
@@ -180,11 +93,8 @@ describe 'Update From Travis', ->
 
         beforeEach (done) ->
           options =
-            uri: '/deployments/travis-ci'
+            uri: '/deployments/travis-ci/pro'
             baseUrl: "http://localhost:#{@serverPort}"
-            headers:
-              'Travis-Repo-Slug': 'hi'
-              'Authorization': @travisAuth.encryptOrg('hi')
             form:
               payload:
                 status: 1
@@ -235,11 +145,8 @@ describe 'Update From Travis', ->
         describe 'when the webhook is passing', ->
           beforeEach (done) ->
             options =
-              uri: '/deployments/travis-ci'
+              uri: '/deployments/travis-ci/pro'
               baseUrl: "http://localhost:#{@serverPort}"
-              headers:
-                'Travis-Repo-Slug': 'hi'
-                'Authorization': @travisAuth.encryptOrg('hi')
               form:
                 payload:
                   status: 1
@@ -273,11 +180,8 @@ describe 'Update From Travis', ->
         describe 'when the webhook is not a tag commit', ->
           beforeEach (done) ->
             options =
-              uri: '/deployments/travis-ci'
+              uri: '/deployments/travis-ci/pro'
               baseUrl: "http://localhost:#{@serverPort}"
-              headers:
-                'Travis-Repo-Slug': 'hi'
-                'Authorization': @travisAuth.encryptOrg('hi')
               form:
                 payload:
                   status: 1
@@ -295,11 +199,8 @@ describe 'Update From Travis', ->
         describe 'when the webhook is failed', ->
           beforeEach (done) ->
             options =
-              uri: '/deployments/travis-ci'
+              uri: '/deployments/travis-ci/pro'
               baseUrl: "http://localhost:#{@serverPort}"
-              headers:
-                'Travis-Repo-Slug': 'hi'
-                'Authorization': @travisAuth.encryptOrg('hi')
               form:
                 payload:
                   status: 0

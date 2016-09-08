@@ -17,8 +17,6 @@ describe 'Update Build Passed', ->
       logFn: @logFn
       username: 'username'
       password: 'password'
-      travisTokenPro: 'hello-pro'
-      travisTokenOrg: 'hello-org'
 
     serverOptions.database = @db.database
 

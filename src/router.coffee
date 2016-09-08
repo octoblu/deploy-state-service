@@ -3,20 +3,21 @@ TravisAuth            = require './middlewares/travisauth-middleware'
 DeployStateController = require './controllers/deploy-state-controller'
 
 class Router
-  constructor: ({ @deployStateService, @username, @password, @travisTokenPro, @travisTokenOrg }) ->
+  constructor: ({ @deployStateService, @username, @password, @disableTravisAuth }) ->
     throw new Error 'Missing deployStateService' unless @deployStateService?
-    throw new Error 'Missing travisTokenPro' unless @travisTokenPro?
-    throw new Error 'Missing travisTokenOrg' unless @travisTokenOrg?
     throw new Error 'Missing username' unless @username?
     throw new Error 'Missing password' unless @password?
 
   route: (app) =>
-    travisAuth = new TravisAuth { @travisTokenPro, @travisTokenOrg }
-    deployStateController = new DeployStateController {@deployStateService}
+    travisAuth = new TravisAuth { @disableTravisAuth }
+    deployStateController = new DeployStateController { @deployStateService }
 
-    app.use (request) =>
-      if request.path == '/deployments/travis-ci'
-        return travisAuth.auth() arguments...
+    app.use (request, response, next) =>
+      if request.path == '/deployments/travis-ci/pro'
+        return travisAuth.authPro request, response, next
+
+      if request.path == '/deployments/travis-ci/org'
+        return travisAuth.authOrg request, response, next
 
       return basicauth(@username, @password) arguments...
 
@@ -39,8 +40,8 @@ class Router
       .delete deployStateController.deleteWebhook
 
     app.post '/deployments/quay.io', deployStateController.updateFromQuay
-    app.post '/deployments/travis-ci', deployStateController.updateFromTravis
 
-    app.get '/authorize', (request, response) => response.sendStatus(204)
+    app.post '/deployments/travis-ci/pro', deployStateController.updateFromTravis
+    app.post '/deployments/travis-ci/org', deployStateController.updateFromTravis
 
 module.exports = Router

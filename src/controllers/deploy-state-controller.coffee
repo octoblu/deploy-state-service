@@ -1,7 +1,7 @@
 debug = require('debug')('deploy-state-service:controller')
 
 class DeployStateController
-  constructor: ({@deployStateService}) ->
+  constructor: ({ @deployStateService }) ->
     throw new Error 'Missing deployStateService' unless @deployStateService?
 
   getDeployment: (request, response) =>

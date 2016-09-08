@@ -22,8 +22,6 @@ describe 'Update And Trigger Webhook', ->
       logFn: @logFn
       username: 'username'
       password: 'password'
-      travisTokenPro: 'hello-pro'
-      travisTokenOrg: 'hello-org'
 
     serverOptions.database = @db.database
 

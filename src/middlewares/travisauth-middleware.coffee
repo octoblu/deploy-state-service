@@ -1,36 +1,47 @@
-crypto = require 'crypto'
+request       = require 'request'
+httpSignature = require 'http-signature'
+
+TRAVIS_PRO_URI = 'https://api.travis-ci.com/config'
+TRAVIS_ORG_URI = 'https://api.travis-ci.org/config'
 
 class TravisAuth
-  constructor: ({ @travisTokenPro, @travisTokenOrg }) ->
-    throw new Error 'Missing travisTokenOrg' unless @travisTokenOrg?
-    throw new Error 'Missing travisTokenPro' unless @travisTokenPro?
+  constructor: ({ @disableTravisAuth }) ->
 
-  encryptOrg: (data) =>
-    return crypto.createHash('sha256')
-      .update "#{@travisTokenOrg}#{data}"
-      .digest 'hex'
+  authPro: (request, response, next) =>
+    @_getProPublicKey @_handleResponse request, response, next
 
-  encryptPro: (data) =>
-    return crypto.createHash('sha256')
-      .update "#{@travisTokenPro}#{data}"
-      .digest 'hex'
+  authOrg: (request, response, next) =>
+    @_getOrgPublicKey @_handleResponse request, response, next
 
-  auth: =>
-    return @_middleware
+  _handleResponse: (request, response, next) =>
+    return (error, pub) =>
+      return response.sendError error if error?
+      return next() if @disableTravisAuth
+      payload = JSON.stringify request.body?.payload
+      verified = httpSignature.verifySignature payload, pub
+      return response.sendStatus(401) unless verified
+      next()
 
-  _middleware: (request, response, next) =>
-    orgAuth = @encryptOrg request.get('Travis-Repo-Slug')
-    proAuth = @encryptPro request.get('Travis-Repo-Slug')
-    return response.sendStatus(401) unless request.get('Authorization') in [orgAuth, proAuth]
-    return response.sendStatus(400) unless @_validate request.body.payload
-    next()
+  _getOrgPublicKey: (callback) =>
+    return callback null, @_orgPublicKey if @_orgPublicKey?
+    options =
+      uri: TRAVIS_ORG_URI
+      json: true
+    request.get options, (error, response, body) =>
+      return callback error if error?
+      return callback body if response.statusCode > 299
+      @_orgPublicKey = body?.config?.notifications?.webhook?.public_key
+      callback null, @_orgPublicKey
 
-  _validate: (payload) =>
-    return false unless payload?
-    return false unless payload.status?
-    return false unless payload.branch?
-    return false unless payload.repository?
-    return true
-
+  _getProPublicKey: (callback) =>
+    return callback null, @_proPublicKey if @_proPublicKey?
+    options =
+      uri: TRAVIS_PRO_URI
+      json: true
+    request.get options, (error, response, body) =>
+      return callback error if error?
+      return callback body if response.statusCode > 299
+      @_proPublicKey = body?.config?.notifications?.webhook?.public_key
+      callback null, @_proPublicKey
 
 module.exports = TravisAuth
