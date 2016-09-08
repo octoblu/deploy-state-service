@@ -60,7 +60,7 @@ class DeployStateController
     { date } = request.query
     options = {
       key: 'build.travis-ci',
-      passing: status == 1 || status == '1',
+      passing: status == 0 || status == '0',
       owner: repository.owner_name,
       repo: repository.name,
       tag: branch,
