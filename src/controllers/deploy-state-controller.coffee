@@ -32,7 +32,6 @@ class DeployStateController
         response.sendStatus 204
 
   updateFromQuay: (request, response) =>
-    debug 'updateFromQuay body', request.body
     { docker_url, name, namespace, updated_tags } = request.body
     { date } = request.query
     tag = _.first(updated_tags)
@@ -56,8 +55,7 @@ class DeployStateController
     catch error
       response.sendError error
       return
-
-    { repository, status, branch } = payload
+    { repository, status, result, branch } = payload
     return response.sendStatus(422) unless /^v\d+/.test branch
     { date } = request.query
     options = {
@@ -68,6 +66,7 @@ class DeployStateController
       tag: branch,
       date
     }
+    debug 'updateFromTravis', { status, result }
     debug 'updateFromTravis', options
     @deployStateService.upsertDeployment options, (error) =>
       return response.sendError error if error?
