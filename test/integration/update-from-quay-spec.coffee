@@ -39,9 +39,12 @@ describe 'Update From Quay', ->
             username: 'username'
             password: 'password'
           json:
-            repository: 'the-owner/the-service'
-            docker_url: 'quay.io/the-owner/the-service:v1.0.0'
-            tag:        'v1.0.0'
+            name: 'the-service'
+            namespace: 'the-owner'
+            docker_url: 'quay.io/the-owner/the-service'
+            updated_tags: [
+              'v1.0.0'
+            ]
 
         request.post options, (error, @response, @body) =>
           done error
@@ -74,9 +77,12 @@ describe 'Update From Quay', ->
               username: 'username'
               password: 'password'
             json:
-              repository: 'the-owner/the-service'
-              docker_url: 'quay.io/the-owner/the-service:v1.0.0'
-              tag:        'v1.0.0'
+              name: 'the-service'
+              namespace: 'the-owner'
+              docker_url: 'quay.io/the-owner/the-service'
+              updated_tags: [
+                'v1.0.0'
+              ]
 
           request.post options, (error, @response, @body) =>
             done error
@@ -130,9 +136,12 @@ describe 'Update From Quay', ->
               username: 'username'
               password: 'password'
             json:
-              repository: 'the-owner/the-service'
-              docker_url: 'quay.io/the-owner/the-service:v1.0.0'
-              tag:        'v1.0.0'
+              name: 'the-service'
+              namespace: 'the-owner'
+              docker_url: 'quay.io/the-owner/the-service'
+              updated_tags: [
+                'v1.0.0'
+              ]
 
           request.post options, (error, @response, @body) =>
             done error

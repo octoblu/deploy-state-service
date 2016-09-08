@@ -37,7 +37,7 @@ describe 'Update From Travis Org', ->
           uri: '/deployments/travis-ci/org'
           baseUrl: "http://localhost:#{@serverPort}"
           form:
-            payload:
+            payload: JSON.stringify
               status: 1
               branch: 'v1.0.0'
               repository:
@@ -96,7 +96,7 @@ describe 'Update From Travis Org', ->
             uri: '/deployments/travis-ci/org'
             baseUrl: "http://localhost:#{@serverPort}"
             form:
-              payload:
+              payload: JSON.stringify
                 status: 1
                 branch: 'v1.0.0'
                 repository:
@@ -148,7 +148,7 @@ describe 'Update From Travis Org', ->
               uri: '/deployments/travis-ci/org'
               baseUrl: "http://localhost:#{@serverPort}"
               form:
-                payload:
+                payload: JSON.stringify
                   status: 1
                   branch: 'v1.0.0'
                   repository:
@@ -183,7 +183,7 @@ describe 'Update From Travis Org', ->
               uri: '/deployments/travis-ci/org'
               baseUrl: "http://localhost:#{@serverPort}"
               form:
-                payload:
+                payload: JSON.stringify
                   status: 1
                   branch: 'master'
                   repository:
@@ -202,7 +202,7 @@ describe 'Update From Travis Org', ->
               uri: '/deployments/travis-ci/org'
               baseUrl: "http://localhost:#{@serverPort}"
               form:
-                payload:
+                payload: JSON.stringify
                   status: 0
                   branch: 'v1.0.0'
                   repository:

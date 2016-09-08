@@ -1,3 +1,4 @@
+_     = require 'lodash'
 debug = require('debug')('deploy-state-service:controller')
 
 class DeployStateController
@@ -31,15 +32,16 @@ class DeployStateController
         response.sendStatus 204
 
   updateFromQuay: (request, response) =>
-    { docker_url, repository, tag } = request.body
+    debug 'updateFromQuay body', request.body
+    { docker_url, name, namespace, updated_tags } = request.body
     { date } = request.query
-    [ owner, repo ] = repository.split '/'
+    tag = _.first(updated_tags)
     options = {
-      dockerUrl: docker_url,
+      dockerUrl: "#{docker_url}:#{tag}",
       key: 'build.docker',
       passing: true,
-      owner,
-      repo,
+      owner: namespace,
+      repo: name,
       tag,
       date
     }
@@ -49,7 +51,13 @@ class DeployStateController
       response.sendStatus 201
 
   updateFromTravis: (request, response) =>
-    { repository, status, branch } = request.body?.payload
+    try
+      payload = JSON.parse request.body?.payload
+    catch error
+      response.sendError error
+      return
+
+    { repository, status, branch } = payload
     return response.sendStatus(422) unless /^v\d+/.test branch
     { date } = request.query
     options = {

@@ -21,7 +21,7 @@ class TravisAuth
       debug 'got publicKey', { error, gotPublicKey: pub? }
       return response.sendError error if error?
       return next() if @disableTravisAuth
-      payload = JSON.stringify request.body?.payload
+      payload = request.body?.payload
       signature = request.get 'Signature'
       debug 'verifying', { payload, signature }
       return response.sendStatus(401) unless signature?
