@@ -38,7 +38,7 @@ describe 'Update From Travis Pro', ->
           baseUrl: "http://localhost:#{@serverPort}"
           form:
             payload: JSON.stringify
-              status: 1
+              status: 0
               branch: 'v1.0.0'
               repository:
                 name: 'the-service'
@@ -97,7 +97,7 @@ describe 'Update From Travis Pro', ->
             baseUrl: "http://localhost:#{@serverPort}"
             form:
               payload: JSON.stringify
-                status: 1
+                status: 0
                 branch: 'v1.0.0'
                 repository:
                   name: 'the-service'
@@ -149,7 +149,7 @@ describe 'Update From Travis Pro', ->
               baseUrl: "http://localhost:#{@serverPort}"
               form:
                 payload: JSON.stringify
-                  status: 1
+                  status: 0
                   branch: 'v1.0.0'
                   repository:
                     name: 'the-service'
@@ -203,7 +203,7 @@ describe 'Update From Travis Pro', ->
               baseUrl: "http://localhost:#{@serverPort}"
               form:
                 payload: JSON.stringify
-                  status: 0
+                  status: 1
                   branch: 'v1.0.0'
                   repository:
                     name: 'the-service'
