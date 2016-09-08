@@ -1,9 +1,12 @@
+debug = require('debug')('deploy-state-service:controller')
+
 class DeployStateController
   constructor: ({@deployStateService}) ->
     throw new Error 'Missing deployStateService' unless @deployStateService?
 
   getDeployment: (request, response) =>
     { owner, repo, tag } = request.params
+    debug 'getDeployment', { owner, repo, tag }
     @deployStateService.getDeployment { owner, repo, tag }, (error, deployment, code) =>
       return response.sendError error if error?
       return response.sendStatus code if code?
@@ -12,6 +15,7 @@ class DeployStateController
   createDeployment: (request, response) =>
     { owner, repo, tag } = request.params
     { date } = request.query
+    debug 'createDeployment', { owner, repo, tag }
     @deployStateService.createDeployment { owner, repo, tag, date }, (error, code) =>
       return response.sendError error if error?
       response.sendStatus code
@@ -21,6 +25,7 @@ class DeployStateController
       { owner, repo, tag, state } = request.params
       { date } = request.query
       options = { owner, repo, tag, key: "#{key}.#{state}", passing, date }
+      debug 'upsertDeployment', options
       @deployStateService.upsertDeployment options, (error) =>
         return response.sendError error if error?
         response.sendStatus 204
@@ -38,6 +43,7 @@ class DeployStateController
       tag,
       date
     }
+    debug 'updateFromQuay', options
     @deployStateService.upsertDeployment options, (error) =>
       return response.sendError error if error?
       response.sendStatus 201
@@ -54,18 +60,21 @@ class DeployStateController
       tag: branch,
       date
     }
+    debug 'updateFromTravis', options
     @deployStateService.upsertDeployment options, (error) =>
       return response.sendError error if error?
       response.sendStatus 204
 
   listDeployments: (request, response) =>
     { owner, repo } = request.params
+    debug 'listDeployments', { owner, repo }
     @deployStateService.listDeployments { owner, repo }, (error, deployments) =>
       return response.sendError error if error?
       response.status(200).send { deployments }
 
   registerWebhook: (request, response) =>
     { url, auth, events } = request.body
+    debug 'registerWebhook', { url, auth, events }
     return response.sendStatus(422) unless url?
     @deployStateService.registerWebhook { url, auth, events }, (error, code) =>
       return response.sendError error if error?
@@ -73,6 +82,7 @@ class DeployStateController
 
   deleteWebhook: (request, response) =>
     { url } = request.body
+    debug 'delete webhook', { url }
     return response.sendStatus(422) unless url?
     @deployStateService.deleteWebhook { url }, (error, code) =>
       return response.sendError error if error?
