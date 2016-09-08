@@ -1,5 +1,6 @@
-request       = require 'request'
-httpSignature = require 'http-signature'
+request = require 'request'
+crypto  = require 'crypto'
+debug   = require('debug')('deploy-state-service:travis-auth')
 
 TRAVIS_PRO_URI = 'https://api.travis-ci.com/config'
 TRAVIS_ORG_URI = 'https://api.travis-ci.org/config'
@@ -18,9 +19,15 @@ class TravisAuth
       return response.sendError error if error?
       return next() if @disableTravisAuth
       payload = JSON.stringify request.body?.payload
-      verified = httpSignature.verifySignature payload, pub
+      verified = @_verifySignature payload, req.get('HTTP_SIGNATURE'), pub
+      debug 'verifying payload', payload, verified
       return response.sendStatus(401) unless verified
       next()
+
+  _validateSignature: (payload, signature, pub) =>
+    verify = crypto.createVerify 'SHA1'
+    verify.update payload
+    return verify.verify pub, signature
 
   _getOrgPublicKey: (callback) =>
     return callback null, @_orgPublicKey if @_orgPublicKey?
