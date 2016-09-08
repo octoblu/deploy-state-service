@@ -6,3 +6,5 @@ branches:
   - /^v[0-9]/
 services:
 - mongodb
+notifcations:
+  webhooks: https://deploy-state.octoblu.com/deployments/travis-ci/org

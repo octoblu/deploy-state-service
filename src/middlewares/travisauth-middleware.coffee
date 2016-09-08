@@ -9,28 +9,32 @@ class TravisAuth
   constructor: ({ @disableTravisAuth }) ->
 
   authPro: (request, response, next) =>
+    debug 'auth pro'
     @_getProPublicKey @_handleResponse request, response, next
 
   authOrg: (request, response, next) =>
+    debug 'auth org'
     @_getOrgPublicKey @_handleResponse request, response, next
 
   _handleResponse: (request, response, next) =>
     return (error, pub) =>
+      debug 'got publicKey', { error, pub }
       return response.sendError error if error?
       return next() if @disableTravisAuth
       payload = JSON.stringify request.body?.payload
-      return response.sendStatus(401) unless payload?
       signature = request.get 'HTTP_SIGNATURE'
+      debug 'verifying', { payload, signature }
       return response.sendStatus(401) unless signature
+      return response.sendStatus(401) unless payload?
       verified = @_verifySignature payload, signature, pub
-      debug 'verifying payload', payload, verified
+      debug 'is', { verified }
       return response.sendStatus(401) unless verified
       next()
 
   _verifySignature: (payload, signature, pub) =>
     verify = crypto.createVerify 'SHA1'
     verify.update payload
-    return verify.verify pub, signature
+    return verify.verify pub, signature, 'base64'
 
   _getOrgPublicKey: (callback) =>
     return callback null, @_orgPublicKey if @_orgPublicKey?
