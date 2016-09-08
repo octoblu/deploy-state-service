@@ -18,13 +18,13 @@ class TravisAuth
 
   _handleResponse: (request, response, next) =>
     return (error, pub) =>
-      debug 'got publicKey', { error, pub }
+      debug 'got publicKey', { error, gotPublicKey: pub? }
       return response.sendError error if error?
       return next() if @disableTravisAuth
       payload = JSON.stringify request.body?.payload
-      signature = request.get 'HTTP_SIGNATURE'
+      signature = request.get 'Signature'
       debug 'verifying', { payload, signature }
-      return response.sendStatus(401) unless signature
+      return response.sendStatus(401) unless signature?
       return response.sendStatus(401) unless payload?
       verified = @_verifySignature payload, signature, pub
       debug 'is', { verified }

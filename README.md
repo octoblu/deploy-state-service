@@ -229,12 +229,7 @@ For create the request method is a POST and for update it is PUT.
 
 ```yml
 notifications:
-  webhooks:
-   urls:
-     - https://deploy-state.octoblu.com/deployments/travis-ci/pro
-   on_success: 'always'
-   on_failure: 'always'
-   on_start:   'always'
+  webhooks: https://deploy-state.octoblu.com/deployments/travis-ci/pro
 ```
 
 ### Public Repos
@@ -245,12 +240,7 @@ notifications:
 
 ```yml
 notifications:
-  webhooks:
-   urls:
-     - https://deploy-state.octoblu.com/deployments/travis-ci/org
-   on_success: 'always'
-   on_failure: 'always'
-   on_start:   'always'
+  webhooks: https://deploy-state.octoblu.com/deployments/travis-ci/org
 ```
 
 ## License
