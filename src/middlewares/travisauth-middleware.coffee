@@ -19,12 +19,15 @@ class TravisAuth
       return response.sendError error if error?
       return next() if @disableTravisAuth
       payload = JSON.stringify request.body?.payload
-      verified = @_verifySignature payload, req.get('HTTP_SIGNATURE'), pub
+      return response.sendStatus(401) unless payload?
+      signature = request.get 'HTTP_SIGNATURE'
+      return response.sendStatus(401) unless signature
+      verified = @_verifySignature payload, signature, pub
       debug 'verifying payload', payload, verified
       return response.sendStatus(401) unless verified
       next()
 
-  _validateSignature: (payload, signature, pub) =>
+  _verifySignature: (payload, signature, pub) =>
     verify = crypto.createVerify 'SHA1'
     verify.update payload
     return verify.verify pub, signature
