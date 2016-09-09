@@ -10,17 +10,18 @@ class TravisAuth
 
   authPro: (request, response, next) =>
     debug 'auth pro'
+    return next() if @disableTravisAuth
     @_getProPublicKey @_handleResponse request, response, next
 
   authOrg: (request, response, next) =>
     debug 'auth org'
+    return next() if @disableTravisAuth
     @_getOrgPublicKey @_handleResponse request, response, next
 
   _handleResponse: (request, response, next) =>
     return (error, pub) =>
       debug 'got publicKey', { error, gotPublicKey: pub? }
       return response.sendError error if error?
-      return next() if @disableTravisAuth
       payload = request.body?.payload
       signature = request.get 'Signature'
       debug 'verifying', { payload, signature }

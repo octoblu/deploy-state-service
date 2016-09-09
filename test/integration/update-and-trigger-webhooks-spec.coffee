@@ -172,11 +172,6 @@ describe 'Update And Trigger Webhook', ->
           .send deployment
           .reply(422)
 
-        @trigger3 = @webhookClient.put('/trigger')
-          .set 'Authorization', 'Basic ' + new Buffer('uuid:token').toString('base64')
-          .send deployment
-          .reply(404)
-
         @triggerSuccess = @webhookClient.put('/trigger-success')
           .set 'Authorization', 'Basic ' + new Buffer('uuid:token').toString('base64')
           .send deployment
@@ -198,7 +193,6 @@ describe 'Update And Trigger Webhook', ->
       it 'should return a 204 and hit up the webhook 3 times and the success webhook', ->
         expect(@response.statusCode).to.equal 204
         @trigger1.done()
-        @trigger2.done()
-        @trigger3.done()
+        expect(@trigger2.isDone).to.be.false
         @triggerSuccess.done()
 

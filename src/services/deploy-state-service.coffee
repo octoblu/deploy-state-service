@@ -2,6 +2,7 @@ _       = require 'lodash'
 async   = require 'async'
 moment  = require 'moment'
 request = require 'request'
+debug   = require('debug')('deploy-state-service:service')
 
 PROJECTION =
   _id:   false
@@ -98,16 +99,14 @@ class DeployStateService
     return true
 
   _notifyAll: (command, { owner, repo, tag }, callback) =>
+    debug 'notifying all', { command }
     @webhooks.find {}, (error, webhooks) =>
+      debug 'got webhooks', { error, webhooks }
       return callback error if error?
       return callback null if _.isEmpty webhooks
       @_findDeployment { owner, repo, tag }, (error, deployment) =>
         return callback error if error?
-        async.each webhooks, async.apply(@_tryAndNotify, command, deployment), callback
-
-  _tryAndNotify: (command, deployment, { url, auth, events }, callback) =>
-    options = { times: 3, interval: 500 }
-    async.retry options, async.apply(@_notify, command, deployment, { url, auth, events }), => callback null
+        async.each webhooks, async.apply(@_notify, command, deployment), callback
 
   _notify: (command, deployment, { url, auth, events }, callback) =>
     events = ['create', 'update'] if _.isEmpty events
@@ -120,10 +119,10 @@ class DeployStateService
       auth,
       json: deployment
     }
+    debug 'notifying', options
     request options, (error, response, body) =>
       return callback error if error?
-      return callback new Error 'Fatal error from webhook' if response.statusCode >= 500
-      return callback new Error "Non-200 level statusCode from webhook" if response.statusCode >= 300
+      debug 'notify response', { url, statusCode: response.statusCode, body }
       callback null
 
   _getDate: (date) =>

@@ -179,7 +179,7 @@ Register a webhook to be triggered everytime a deployment is updated, or created
 }
 ```
 
-When a deployment is created and updated the deploy-state-service will hit the webhook, up to 3 times, until it gets 200 level status code back. 
+When a deployment is created and updated the deploy-state-service will hit up the webhook with the deployment in the body. 
 
 The webhook's auth username and password will be sent along with the request.
 
