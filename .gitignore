@@ -30,3 +30,4 @@ meshblu.json
 
 dpl_*
 *.local.sh
+.nyc_output

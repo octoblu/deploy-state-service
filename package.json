@@ -1,6 +1,6 @@
 {
   "name": "deploy-state-service",
-  "version": "8.0.9",
+  "version": "8.1.0",
   "description": "Micro-service for deploying micro-services",
   "keywords": [
     "Octoblu",
@@ -19,13 +19,22 @@
   },
   "scripts": {
     "start": "node command.js",
-    "test": "mocha"
+    "test": "mocha",
+    "coverage": "nyc npm test",
+    "mocha:json": "mocha --reporter json > coverage/mocha.json",
+    "test:watch": "mocha -w -R mocha-multi --reporter-options spec=-,mocha-osx-reporter=-"
   },
   "devDependencies": {
     "chai": "^3.5.0",
-    "mocha": "^3.0.2",
+    "chai-subset": "^1.3.0",
+    "coffee-script": "^1.11.1",
+    "env-test": "^1.0.0",
+    "mocha": "^3.1.0",
+    "mocha-multi": "^0.9.1",
+    "mocha-osx-reporter": "^0.1.2",
+    "nyc": "^8.3.0",
     "shmock": "^0.8.1",
-    "sinon": "^1.17.5",
+    "sinon": "^1.17.6",
     "sinon-chai": "^2.8.0"
   },
   "dependencies": {
@@ -40,5 +49,16 @@
     "request": "^2.74.0",
     "server-destroy": "^1.0.1"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "nyc": {
+    "cache": true,
+    "reporter": [
+      "text-summary",
+      "lcov",
+      "json"
+    ],
+    "extension": [
+      ".coffee"
+    ]
+  }
 }

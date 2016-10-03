@@ -40,6 +40,7 @@ class Router
       .delete deployStateController.deleteWebhook
 
     app.post '/deployments/quay.io', deployStateController.updateFromQuay
+    app.post '/deployments/docker-hub', deployStateController.updateFromDockerHub
 
     app.post '/deployments/travis-ci/pro', deployStateController.updateFromTravis
     app.post '/deployments/travis-ci/org', deployStateController.updateFromTravis

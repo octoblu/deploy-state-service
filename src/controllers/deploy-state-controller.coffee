@@ -49,6 +49,24 @@ class DeployStateController
       return response.sendError error if error?
       response.sendStatus 201
 
+  updateFromDockerHub: (request, response) =>
+    { push_data, repository } = request.body
+    { tag, pushed_at } = push_data
+    { name, namespace, repo_name } = repository
+    options = {
+      dockerUrl: "#{repo_name}:#{tag}"
+      key: 'build.docker'
+      passing: true
+      owner: namespace
+      repo: name
+      date: pushed_at
+      tag
+    }
+    debug 'updateFromDockerHub', options
+    @deployStateService.upsertDeployment options, (error) =>
+      return response.sendError error if error?
+      response.sendStatus 201
+
   updateFromTravis: (request, response) =>
     try
       payload = JSON.parse request.body?.payload
